@@ -1474,6 +1474,9 @@
             <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm"><i
                 class="fas fa-network-wired mr-2 text-slate-400"></i>Tree-Grid Items</h3>
             <div class="flex gap-2">
+              <button onclick="expandAllSO2()"
+                class="text-slate-500 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg transition"><i
+                  class="fas fa-chevron-down mr-1"></i>Expand All</button>
               <button onclick="collapseAllSO2()"
                 class="text-slate-500 text-xs font-bold bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg transition"><i
                   class="fas fa-chevron-up mr-1"></i>Collapse All</button>
@@ -3468,7 +3471,7 @@
 
       for (const storeName in forecastData) {
         let custName = 'Unknown';
-        customers.forEach(c => { if (c.stores.includes(storeName)) custName = c.name; });
+        customers.forEach(c => { if (c.stores.some(s => s.name === storeName || s === storeName)) custName = c.name; });
         for (const itemCode in forecastData[storeName]) {
           const qty = forecastData[storeName][itemCode][dayIndex];
           if (qty > 0) {
@@ -3481,7 +3484,7 @@
       const matchedPOs = purchaseOrders.filter(po => po.date === dateStr);
       matchedPOs.forEach(po => {
         let custName = 'Unknown';
-        customers.forEach(c => { if (c.stores.includes(po.store)) custName = c.name; });
+        customers.forEach(c => { if (c.stores.some(s => s.name === po.store || s === po.store)) custName = c.name; });
         po.items.forEach(line => {
           if (line.qty > 0) {
             const itemCode = line.itemCode;
@@ -3588,6 +3591,18 @@
         if (btn) {
           btn.innerHTML = '<i class="fas fa-plus"></i>';
           btn.classList.remove('bg-blue-100', 'text-blue-600');
+        }
+      });
+    }
+
+    function expandAllSO2() {
+      so2DraftData.forEach((_, i) => {
+        const rows = document.querySelectorAll('.so2-child-' + i);
+        rows.forEach(r => r.classList.remove('hidden'));
+        const btn = document.getElementById('so2-btn-' + i);
+        if (btn) {
+          btn.innerHTML = '<i class="fas fa-minus"></i>';
+          btn.classList.add('bg-blue-100', 'text-blue-600');
         }
       });
     }
