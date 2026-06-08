@@ -466,11 +466,49 @@
     </div>
   </div>
 
+  <!-- ===================== PRICE LIST DETAIL MODAL ===================== -->
+  <div id="price-list-detail-overlay" class="scm-modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="price-list-detail-id">
+    <div
+      class="scm-modal-card bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden border border-slate-200">
+      <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span class="text-xs font-black text-blue-600 uppercase tracking-widest">Active Price List</span>
+          </div>
+          <h3 id="price-list-detail-id" class="text-lg font-black text-slate-900 font-mono">PL-000</h3>
+          <p id="price-list-detail-meta" class="text-xs text-slate-400 mt-0.5"></p>
+        </div>
+        <button onclick="closePriceListDetail()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-5 border-b border-slate-100 bg-white">
+        <div class="text-[10px] font-black text-slate-400 uppercase mb-2">Target Stores</div>
+        <div id="price-list-detail-stores" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div class="overflow-y-auto custom-scrollbar" style="max-height: 420px;">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+              <th class="px-5 py-3">Code</th>
+              <th class="px-5 py-3">Product</th>
+              <th class="px-5 py-3 text-right">Active Price</th>
+            </tr>
+          </thead>
+          <tbody id="price-list-detail-body" class="divide-y divide-slate-50"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== BILLING FORM MODAL ===================== -->
   <div id="billing-form-overlay" class="scm-modal-overlay" role="dialog" aria-modal="true"
     aria-labelledby="billing-form-title">
     <div
-      class="scm-modal-card bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-slate-200">
+      class="scm-modal-card bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 overflow-hidden border border-slate-200">
       <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
         <div>
           <div class="flex items-center gap-2 mb-1">
@@ -478,45 +516,93 @@
             <span class="text-xs font-black text-blue-600 uppercase tracking-widest">Create Invoice</span>
           </div>
           <h3 id="billing-form-title" class="text-lg font-black text-slate-900">Create New Billing</h3>
-          <p id="billing-form-meta" class="text-xs text-slate-400 mt-0.5">Select a Delivery Order to load items</p>
+          <p id="billing-form-meta" class="text-xs text-slate-400 mt-0.5">Select a store and one or more Delivery Orders
+          </p>
         </div>
         <button onclick="closeBillingForm()"
           class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="p-6 bg-white border-b border-slate-100">
+      <div class="p-6 bg-white border-b border-slate-100 grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
           <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Invoice Date</label>
           <input type="date" id="billing-date-input"
-            class="w-full md:w-56 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Customer</label>
+          <select id="billing-customer-select" onchange="onBillingCustomerChange()"
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Select Customer</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Search Store</label>
+          <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="billing-store-search" oninput="renderBillingStoreOptions()"
+              placeholder="Type store name..."
+              class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Store</label>
+          <select id="billing-store-select" onchange="filterBillingDOs()"
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Select Store</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">DO From</label>
+            <input type="date" id="billing-do-date-from" onchange="filterBillingDOs()"
+              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">DO To</label>
+            <input type="date" id="billing-do-date-to" onchange="filterBillingDOs()"
+              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
         </div>
       </div>
-      <div class="overflow-y-auto custom-scrollbar" style="max-height: 280px;">
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b border-slate-100">
-              <th class="px-5 py-3">Product</th>
-              <th class="px-5 py-3 text-right">Price</th>
-              <th class="px-5 py-3 text-right">Qty</th>
-              <th class="px-5 py-3 text-right w-24">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody id="billing-form-body" class="divide-y divide-slate-50"></tbody>
-        </table>
+      <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] min-h-0">
+        <div class="border-r border-slate-100 bg-slate-50/40">
+          <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] font-black text-slate-400 uppercase">Available Delivery Orders</span>
+            <button type="button" onclick="toggleAllBillingDOs(this)"
+              class="text-[10px] font-bold text-blue-600 hover:text-blue-700">Select All</button>
+          </div>
+          <div id="billing-do-checklist" class="overflow-y-auto custom-scrollbar" style="max-height: 310px;">
+            <div class="p-8 text-center text-xs text-slate-400">Select a store to view Delivery Orders.</div>
+          </div>
+        </div>
+        <div class="overflow-y-auto custom-scrollbar" style="max-height: 350px;">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase border-b border-slate-100">
+                <th class="px-5 py-3">Product</th>
+                <th class="px-5 py-3 text-right">Price</th>
+                <th class="px-5 py-3 text-right">Qty</th>
+                <th class="px-5 py-3 text-right w-24">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="billing-form-body" class="divide-y divide-slate-50"></tbody>
+          </table>
+        </div>
       </div>
       <div class="p-6 bg-slate-50 border-t border-slate-100 space-y-3">
         <div class="flex justify-between text-xs text-slate-500 font-bold uppercase tracking-wide">
           <span>Subtotal</span><span id="billing-sub-display">Rp 0</span>
         </div>
-        <div class="flex justify-between text-xs text-slate-500 font-bold uppercase tracking-wide"><span>PPN</span><span
-            id="billing-tax-display">Rp 0</span></div>
         <div class="flex justify-between items-center py-2 border-y border-slate-200/60">
           <label class="text-xs font-black text-slate-400 uppercase">Potongan</label>
           <input type="number" id="billing-potongan-input" oninput="calculateBillingTotals()"
             class="w-32 p-2 bg-white border border-slate-200 rounded-lg text-right font-bold text-red-600 outline-none focus:ring-2 focus:ring-blue-500"
             value="0">
         </div>
+        <div class="flex justify-between text-xs text-slate-500 font-bold uppercase tracking-wide"><span>PPN</span><span
+            id="billing-tax-display">Rp 0</span></div>
         <div class="flex justify-between items-center text-slate-900 pt-1">
           <span class="text-sm font-black uppercase">Grand Total</span>
           <span id="billing-grand-display" class="text-2xl font-black text-blue-600">Rp 0</span>
@@ -865,41 +951,111 @@
 
       <!-- ===== Producer: Billing (List) ===== -->
       <section id="page-producer-billing" class="hidden animate-in fade-in duration-500">
-        <div class="flex justify-between items-end mb-8">
-          <div>
-            <h2 class="text-3xl font-extrabold text-slate-900">Billing & Invoicing</h2>
-            <p class="text-slate-500">Generate invoices from completed deliveries</p>
+        <div class="mb-8">
+          <h2 class="text-3xl font-extrabold text-slate-900">Billing & Invoicing</h2>
+          <p class="text-slate-500">Aggregate Delivery Orders and generate invoices</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Customer</label>
+              <select id="bill-page-customer-select" onchange="onBillingPageCustomerChange()"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Customer</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Store</label>
+              <select id="bill-page-store-select"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Store</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">DO From</label>
+              <input type="date" id="bill-page-date-from"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">DO To</label>
+              <input type="date" id="bill-page-date-to"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="generateBillingPreview()"
+              class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+              <i class="fas fa-filter mr-2"></i>Load Deliveries
+            </button>
+          </div>
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4">
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Billing Date</label>
+              <input type="date" id="bill-page-document-date" onchange="generateBillingPreview()"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Potongan</label>
+              <input type="number" id="bill-page-potongan" value="0" oninput="recalculateBillingPreviewTotals()"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
           </div>
         </div>
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <!-- Pending Invoices -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 bg-amber-50/50">
-              <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm"><i
-                  class="fas fa-file-invoice mr-2 text-amber-500"></i>Pending Billing</h3>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+          <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Billing Preview</h3>
+              <p id="bill-page-preview-meta" class="text-xs text-slate-400 mt-1">Choose a customer, store, and DO period.</p>
             </div>
-            <table class="w-full text-left text-sm">
-              <tbody id="billing-pending-list" class="divide-y divide-slate-100"></tbody>
-            </table>
+            <span id="bill-page-preview-total" class="text-xl font-black text-blue-600">Rp 0</span>
           </div>
-          <!-- Billing History -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 bg-green-50/50">
-              <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm"><i
-                  class="fas fa-check-double mr-2 text-green-500"></i>Billing History</h3>
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-4">Product</th>
+                <th class="p-4 text-right">Total Qty</th>
+                <th class="p-4 text-right">Price</th>
+                <th class="p-4 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="bill-page-preview-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+          <div class="p-6 bg-slate-50 border-t border-slate-100 space-y-2">
+            <div class="flex justify-end gap-8 text-xs font-bold text-slate-500 uppercase">
+              <span>Subtotal</span><span id="bill-page-subtotal" class="w-36 text-right">Rp 0</span>
             </div>
-            <table class="w-full text-left text-sm">
-              <thead>
-                <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
-                  <th class="p-4">Bill Number</th>
-                  <th class="p-4">Store</th>
-                  <th class="p-4 text-right">Total</th>
-                  <th class="p-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="billing-list-body" class="divide-y divide-slate-100"></tbody>
-            </table>
+            <div class="flex justify-end gap-8 text-xs font-bold text-red-500 uppercase">
+              <span>Potongan</span><span id="bill-page-potongan-display" class="w-36 text-right">Rp 0</span>
+            </div>
+            <div class="flex justify-end gap-8 text-xs font-bold text-slate-500 uppercase">
+              <span>PPN</span><span id="bill-page-tax" class="w-36 text-right">Rp 0</span>
+            </div>
+            <div class="pt-3 text-right">
+              <button onclick="saveBillingFromPage()"
+                class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition">
+                <i class="fas fa-file-invoice-dollar mr-2"></i>Create Billing
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-5 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Billing History</h3>
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-4">Document</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Store</th>
+                <th class="p-4 text-center">Deliveries</th>
+                <th class="p-4 text-right">Total</th>
+                <th class="p-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="billing-list-body" class="divide-y divide-slate-100"></tbody>
+          </table>
         </div>
       </section>
 
@@ -1024,7 +1180,7 @@
           <p class="text-slate-500">Define your products and their packaging conversion</p>
         </div>
         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 mb-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
             <div class="md:col-span-1">
               <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Item Code</label>
               <input type="text" id="item-code"
@@ -1044,9 +1200,27 @@
                 class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
                 value="10">
             </div>
+            <div class="md:col-span-1">
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Item Group</label>
+              <select id="item-group-select"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Group</option>
+              </select>
+            </div>
             <button onclick="addItem()" id="btn-add-item"
               class="bg-blue-600 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100">Add
               to Master</button>
+          </div>
+          <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Register New Item Group</label>
+              <input type="text" id="item-group-new" placeholder="e.g. Bread / Pastry / Cake"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="addItemGroup()"
+              class="bg-slate-900 text-white py-3 px-6 rounded-xl font-bold hover:bg-black transition shadow-lg">
+              <i class="fas fa-folder-plus mr-2"></i>Add Group
+            </button>
           </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -1055,6 +1229,7 @@
               <tr class="bg-slate-50 border-b">
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase">Code</th>
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase">Product Name</th>
+                <th class="p-5 text-xs font-bold text-slate-500 uppercase">Item Group</th>
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase">Conversion Rule</th>
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase text-right">Base Unit</th>
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
@@ -1138,13 +1313,22 @@
           <div class="flex gap-3 flex-wrap">
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Store</label>
-              <select id="po-store-select"
+              <select id="po-store-select" onchange="onPOHeaderChange()"
                 class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]">
                 <option value="">— Select Store —</option>
               </select>
             </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">PO Type</label>
+              <select id="po-type-select" onchange="onPOTypeChange()"
+                class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-[160px]">
+                <option value="Forecast">Forecast</option>
+                <option value="Pengganti">Pengganti</option>
+                <option value="Spesial">Spesial</option>
+              </select>
+            </div>
             <div class="flex flex-col justify-end">
-              <input type="date" id="po-date"
+              <input type="date" id="po-date" onchange="onPOHeaderChange()"
                 class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none">
             </div>
             <div class="flex flex-col justify-end">
@@ -1220,7 +1404,7 @@
         <div class="flex justify-between items-end mb-8">
           <div>
             <h2 class="text-3xl font-extrabold text-slate-900">Daily Aggregation</h2>
-            <p class="text-slate-500">Final production numbers for factory output</p>
+            <p class="text-slate-500">Purchase Order summary by PO Type</p>
           </div>
           <input type="date" id="recap-date" onchange="generateRecap()"
             class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none">
@@ -1235,8 +1419,8 @@
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center mb-4"><i
                 class="fas fa-store"></i></div>
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Store Forecasts</p>
-            <h4 class="text-3xl font-black text-slate-900 mt-1" id="stat-total-stores">0</h4>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Forecast PO Docs</p>
+            <h4 class="text-3xl font-black text-slate-900 mt-1" id="stat-total-forecast-po">0</h4>
           </div>
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center mb-4"><i
@@ -1247,15 +1431,16 @@
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="p-5 bg-slate-900 text-white font-bold flex justify-between items-center">
-            <span class="tracking-wide">DAILY PRODUCTION ORDER</span>
+            <span class="tracking-wide">DAILY PURCHASE ORDER SUMMARY</span>
             <span id="recap-display-date" class="text-blue-400 text-sm">Select Date</span>
           </div>
           <table class="w-full text-left">
             <thead>
               <tr class="bg-slate-50 border-b border-slate-200">
                 <th class="p-5 text-xs font-bold text-slate-500 uppercase">Product Details</th>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase text-center">Forecast Sum</th>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase text-center">Additional PO</th>
+                <th class="p-5 text-xs font-bold text-slate-500 uppercase text-center">Forecast PO</th>
+                <th class="p-5 text-xs font-bold text-slate-500 uppercase text-center">Pengganti PO</th>
+                <th class="p-5 text-xs font-bold text-slate-500 uppercase text-center">Spesial PO</th>
                 <th class="p-5 text-xs font-bold text-blue-600 uppercase text-right">Grand Total (Pcs)</th>
               </tr>
             </thead>
@@ -1357,14 +1542,22 @@
               <i class="fas fa-list-ul mr-2 text-slate-400"></i>Line Items
             </h3>
             <div class="flex gap-2">
-              <button onclick="getSOForecast()"
-                class="text-blue-600 text-sm font-bold bg-blue-50 hover:bg-blue-100 border border-blue-200 px-4 py-2 rounded-lg transition flex items-center gap-2">
-                <i class="fas fa-chart-line"></i> Get Forecast
-              </button>
               <button onclick="getSOPurchaseOrder()"
                 class="text-amber-600 text-sm font-bold bg-amber-50 hover:bg-amber-100 border border-amber-200 px-4 py-2 rounded-lg transition flex items-center gap-2">
-                <i class="fas fa-file-invoice"></i> Get Purchase Order
+                <i class="fas fa-file-invoice"></i> Get Purchase Orders
               </button>
+            </div>
+          </div>
+          <div id="so-po-selection-panel" class="hidden border-b border-slate-100 bg-white">
+            <div class="p-5">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest">Selected Purchase Orders</h4>
+                  <p class="text-xs text-slate-400 mt-0.5">Grouped by PO Type and PO Number. Remove a type or document to exclude it from this Sales Order.</p>
+                </div>
+                <span id="so-po-selection-count" class="text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-lg">0 PO</span>
+              </div>
+              <div id="so-po-selection-list" class="space-y-3"></div>
             </div>
           </div>
           <table class="w-full text-left">
@@ -1380,8 +1573,7 @@
             </thead>
             <tbody id="so-table-body" class="divide-y divide-slate-100">
               <tr>
-                <td colspan="4" class="p-10 text-center text-slate-400 italic">Click Get Forecast or Get Purchase Order
-                  to populate items.</td>
+                <td colspan="6" class="p-10 text-center text-slate-400 italic">Select Customer and Store, then click Get Purchase Orders.</td>
               </tr>
             </tbody>
           </table>
@@ -1394,20 +1586,20 @@
         </div>
       </section>
 
-      <!-- ===== Producer: Sales Order  (List) ===== -->
+      <!-- ===== Producer: Production Control (List) ===== -->
       <section id="page-producer-so2" class="hidden animate-in fade-in duration-500">
         <div class="flex justify-between items-end mb-8">
           <div>
-            <h2 class="text-3xl font-extrabold text-slate-900">Work Order</h2>
-            <p class="text-slate-500">Manage Production &amp; Store Sales Orders</p>
+            <h2 class="text-3xl font-extrabold text-slate-900">Production Control</h2>
+            <p class="text-slate-500">Create production orders from Sales Order summaries</p>
           </div>
           <button onclick="openAddSO2()"
             class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-100 hover:bg-blue-700 transition flex items-center gap-2">
-            <i class="fas fa-plus"></i> Create New
+            <i class="fas fa-plus"></i> Create Production
           </button>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 gap-8">
           <!-- Production Orders -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
@@ -1428,7 +1620,7 @@
           </div>
 
           <!-- Store Sales Orders -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hidden">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
               <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm"><i
                   class="fas fa-store mr-2 text-slate-400"></i>Sales Order per Toko</h3>
@@ -1456,7 +1648,7 @@
               class="text-slate-400 hover:text-blue-600 mb-2 flex items-center gap-2 text-sm font-bold transition">
               <i class="fas fa-arrow-left"></i> Back to List
             </button>
-            <h2 class="text-3xl font-extrabold text-slate-900">Create Production &amp; SO</h2>
+            <h2 class="text-3xl font-extrabold text-slate-900">Create Production</h2>
           </div>
         </div>
 
@@ -1466,7 +1658,7 @@
             <input type="date" id="so2-date" onchange="generateSO2Data()"
               class="w-64 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500">
           </div>
-          <p class="text-xs text-slate-400 pb-3 italic">* Changing date will auto-pull Forecasts &amp; POs</p>
+          <p class="text-xs text-slate-400 pb-3 italic">* Changing date will auto-pull Sales Order summary</p>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
@@ -1577,6 +1769,171 @@
         </div>
       </section>
 
+      <!-- ===== Consumer: Goods Return ===== -->
+      <section id="page-consumer-return" class="hidden animate-in fade-in duration-500">
+        <div class="flex justify-between items-end mb-8 flex-wrap gap-4">
+          <div>
+            <h2 class="text-3xl font-extrabold text-slate-900">Goods Return</h2>
+            <p class="text-slate-500">Create product return documents for your store</p>
+          </div>
+          <div class="flex gap-3 flex-wrap">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Store</label>
+              <select id="return-store-select"
+                class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-[220px]">
+                <option value="">Select Store</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Return Date</label>
+              <input type="date" id="return-date"
+                class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+          <div class="p-6 border-b border-slate-100 bg-slate-50/30">
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_160px_auto] gap-3 items-end">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Product Item</label>
+                <select id="return-item-select"
+                  class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select Item</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Qty (Pack)</label>
+                <input type="number" id="return-item-qty" min="1" value="1"
+                  class="w-full p-3 bg-white border border-slate-200 rounded-xl text-right font-bold outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <button onclick="addGoodsReturnItem()"
+                class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+                <i class="fas fa-plus mr-2"></i>Add Item
+              </button>
+            </div>
+          </div>
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-5">Product</th>
+                <th class="p-5 text-right">Qty (Pack)</th>
+                <th class="p-5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="return-draft-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+          <div class="p-6 bg-slate-50 border-t border-slate-100">
+            <button onclick="submitGoodsReturn()"
+              class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition shadow-lg">
+              <i class="fas fa-rotate-left mr-2"></i>Submit Goods Return
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-5 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Return History</h3>
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-4">Document</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Store</th>
+                <th class="p-4 text-center">Items</th>
+                <th class="p-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="return-history-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== Producer: Credit Note ===== -->
+      <section id="page-producer-credit-note" class="hidden animate-in fade-in duration-500">
+        <div class="mb-8">
+          <h2 class="text-3xl font-extrabold text-slate-900">Credit Note</h2>
+          <p class="text-slate-500">Aggregate Goods Returns and apply the active price list</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Store</label>
+              <select id="cn-store-select"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Store</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Return From</label>
+              <input type="date" id="cn-date-from"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Return To</label>
+              <input type="date" id="cn-date-to"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="generateCreditNotePreview()"
+              class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+              <i class="fas fa-filter mr-2"></i>Load Returns
+            </button>
+          </div>
+          <div class="mt-4 max-w-xs">
+            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Credit Note Date</label>
+            <input type="date" id="cn-document-date" onchange="generateCreditNotePreview()"
+              class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+          <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Credit Note Preview</h3>
+              <p id="cn-preview-meta" class="text-xs text-slate-400 mt-1">Choose a store and return period.</p>
+            </div>
+            <span id="cn-preview-total" class="text-xl font-black text-blue-600">Rp 0</span>
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-4">Product</th>
+                <th class="p-4 text-right">Total Qty</th>
+                <th class="p-4 text-right">Active Price</th>
+                <th class="p-4 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="cn-preview-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+          <div class="p-6 bg-slate-50 border-t border-slate-100 text-right">
+            <button onclick="saveCreditNote()"
+              class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition">
+              <i class="fas fa-file-circle-minus mr-2"></i>Create Credit Note
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-5 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Credit Note History</h3>
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="p-4">Document</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Store</th>
+                <th class="p-4 text-center">Returns</th>
+                <th class="p-4 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="cn-history-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1588,6 +1945,8 @@
       users: 'scm_users',
       customers: 'scm_customers',
       items: 'scm_items',
+      itemGroups: 'scm_item_groups',
+      itemGroupReset: 'scm_item_groups_reset_v2',
       forecastData: 'scm_forecastData',
       purchaseOrders: 'scm_purchaseOrders',
       salesOrders: 'scm_salesOrders',
@@ -1597,7 +1956,9 @@
       priceLists: 'scm_price_lists',
       deliveryOrders: 'scm_deliveryOrders',
       actualProduction: 'scm_actualProduction',
-      billings: 'scm_billings'
+      billings: 'scm_billings',
+      goodsReturns: 'scm_goods_returns',
+      creditNotes: 'scm_credit_notes'
     };
 
     // =============================================================
@@ -1647,6 +2008,7 @@
     let users = loadFromLocal(LS_KEYS.users, DEFAULT_USERS);
     let customers = loadFromLocal(LS_KEYS.customers, DEFAULT_CUSTOMERS);
     let items = loadFromLocal(LS_KEYS.items, DEFAULT_ITEMS);
+    let itemGroups = loadFromLocal(LS_KEYS.itemGroups, []);
     let forecastData = loadFromLocal(LS_KEYS.forecastData, {});
     let purchaseOrders = loadFromLocal(LS_KEYS.purchaseOrders, []);
     let salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
@@ -1657,6 +2019,8 @@
     let deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
     let actualProduction = loadFromLocal(LS_KEYS.actualProduction, []);
     let billings = loadFromLocal(LS_KEYS.billings, []);
+    let goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+    let creditNotes = loadFromLocal(LS_KEYS.creditNotes, []);
 
     // DATA MIGRATION: Convert old flat PO data (from version 1) to new Document structure
     // AND Update Customer Store Structure to Object {name, ppn}
@@ -1684,10 +2048,49 @@
     });
     if (poNeedsMigration) saveToLocal(LS_KEYS.purchaseOrders, purchaseOrders);
 
+    if (!localStorage.getItem(LS_KEYS.itemGroupReset)) {
+      const clearStoredDocumentItemGroups = (storageKey) => {
+        const docs = loadFromLocal(storageKey, []);
+        if (!Array.isArray(docs) || !docs.length) return;
+        const cleanedDocs = docs.map(doc => ({
+          ...doc,
+          items: Array.isArray(doc.items) ? doc.items.map(row => ({ ...row, itemGroup: '' })) : doc.items
+        }));
+        saveToLocal(storageKey, cleanedDocs);
+      };
+
+      items = items.map(item => ({ ...item, itemGroup: '' }));
+      saveToLocal(LS_KEYS.items, items);
+      saveToLocal(LS_KEYS.itemGroups, []);
+      [
+        LS_KEYS.purchaseOrders,
+        LS_KEYS.salesOrders,
+        LS_KEYS.so2Production,
+        LS_KEYS.so2Store,
+        LS_KEYS.grpoData,
+        LS_KEYS.deliveryOrders,
+        LS_KEYS.billings,
+        LS_KEYS.goodsReturns,
+        LS_KEYS.creditNotes
+      ].forEach(clearStoredDocumentItemGroups);
+      purchaseOrders = loadFromLocal(LS_KEYS.purchaseOrders, []);
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+      so2Production = loadFromLocal(LS_KEYS.so2Production, []);
+      so2Store = loadFromLocal(LS_KEYS.so2Store, []);
+      grpoData = loadFromLocal(LS_KEYS.grpoData, []);
+      deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
+      billings = loadFromLocal(LS_KEYS.billings, []);
+      goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+      creditNotes = loadFromLocal(LS_KEYS.creditNotes, []);
+      localStorage.setItem(LS_KEYS.itemGroupReset, '1');
+      itemGroups = [];
+    }
+
     // Seed defaults on very first run
     if (!localStorage.getItem(LS_KEYS.users)) saveToLocal(LS_KEYS.users, users);
     if (!localStorage.getItem(LS_KEYS.customers)) saveToLocal(LS_KEYS.customers, customers);
     if (!localStorage.getItem(LS_KEYS.items)) saveToLocal(LS_KEYS.items, items);
+    if (!localStorage.getItem(LS_KEYS.itemGroups)) saveToLocal(LS_KEYS.itemGroups, itemGroups);
     if (!localStorage.getItem(LS_KEYS.forecastData)) saveToLocal(LS_KEYS.forecastData, forecastData);
     if (!localStorage.getItem(LS_KEYS.purchaseOrders)) saveToLocal(LS_KEYS.purchaseOrders, purchaseOrders);
     if (!localStorage.getItem(LS_KEYS.salesOrders)) saveToLocal(LS_KEYS.salesOrders, salesOrders);
@@ -1698,6 +2101,8 @@
     if (!localStorage.getItem(LS_KEYS.deliveryOrders)) saveToLocal(LS_KEYS.deliveryOrders, []);
     if (!localStorage.getItem(LS_KEYS.actualProduction)) saveToLocal(LS_KEYS.actualProduction, []);
     if (!localStorage.getItem(LS_KEYS.billings)) saveToLocal(LS_KEYS.billings, []);
+    if (!localStorage.getItem(LS_KEYS.goodsReturns)) saveToLocal(LS_KEYS.goodsReturns, []);
+    if (!localStorage.getItem(LS_KEYS.creditNotes)) saveToLocal(LS_KEYS.creditNotes, []);
 
     // =============================================================
     //  TOAST NOTIFICATION
@@ -1762,16 +2167,18 @@
           { id: 'page-producer-items', icon: 'fa-tags', label: 'Item Master' },
           { id: 'page-producer-prices', icon: 'fa-money-bill-wave', label: 'Price List' },
           { id: 'page-producer-forecast', icon: 'fa-calendar-days', label: 'Forecasting' },
-          { id: 'page-producer-so2', icon: 'fa-layer-group', label: 'Sales Order/Production' },
+          { id: 'page-producer-so', icon: 'fa-file-invoice-dollar', label: 'Sales Order' },
+          { id: 'page-producer-so2', icon: 'fa-industry', label: 'Production Control' },
           { id: 'page-producer-do', icon: 'fa-truck', label: 'Delivery Order' },
           { id: 'page-producer-actual', icon: 'fa-industry', label: 'Actual Produksi' },
-          /*{ id: 'page-producer-so', icon: 'fa-file-invoice-dollar', label: 'Sales Order' },*/
-          { id: 'page-producer-billing', icon: 'fa-file-invoice', label: 'Billing' }
+          { id: 'page-producer-billing', icon: 'fa-file-invoice', label: 'Billing' },
+          { id: 'page-producer-credit-note', icon: 'fa-file-circle-minus', label: 'Credit Note' }
         ];
       } else if (currentUser.role === 'consumer') {
         menuItems = [
           { id: 'page-consumer-po', icon: 'fa-shopping-bag', label: 'My Orders' },
-          { id: 'page-consumer-receipt', icon: 'fa-box-open', label: 'Penerimaan' }
+          { id: 'page-consumer-receipt', icon: 'fa-box-open', label: 'Penerimaan' },
+          { id: 'page-consumer-return', icon: 'fa-rotate-left', label: 'Goods Return' }
         ];
       }
       nav.innerHTML = menuItems.map(item => `
@@ -1802,8 +2209,10 @@
       if (pageId === 'page-producer-do') renderDeliveryOrderList();
       if (pageId === 'page-producer-actual') renderActualProdList();
       if (pageId === 'page-producer-billing') renderBillingList();
-      if (pageId === 'page-consumer-po') { refreshPOStoreDropdown(); renderPOHistory(); }
+      if (pageId === 'page-consumer-po') { refreshPOStoreDropdown(); onPOTypeChange(); renderPOHistory(); }
       if (pageId === 'page-consumer-receipt') { renderReceiptFilters(); renderGRPOHistory(); }
+      if (pageId === 'page-consumer-return') initGoodsReturnPage();
+      if (pageId === 'page-producer-credit-note') initCreditNotePage();
       if (pageId === 'page-producer-recap') {
         const d = new Date();
         const localDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -1863,17 +2272,23 @@
       document.getElementById('actual-detail-meta').textContent = `${doc.date} · Source: ${doc.sourceProdId || 'Unknown'}`;
 
       const tbody = document.getElementById('actual-detail-body');
-      tbody.innerHTML = (doc.items || []).map(it => {
-        const item = items.find(i => i.code === it.itemCode);
-        const name = item ? item.name : it.itemCode;
-        return `
-          <tr class="hover:bg-slate-50/50 border-t border-slate-100">
-            <td class="px-5 py-3 font-mono text-xs font-bold text-blue-600">${escHtml(it.itemCode)}</td>
-            <td class="px-5 py-3 font-semibold text-slate-800">${escHtml(name)}</td>
-            <td class="px-5 py-3 text-right font-bold text-green-600">${it.qty}</td>
-          </tr>
-        `;
-      }).join('');
+      const groupedItems = groupRowsByItemGroup(doc.items || []);
+      tbody.innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="3" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedItems[groupName].map(it => {
+          const item = items.find(i => i.code === it.itemCode);
+          const name = item ? item.name : it.itemCode;
+          return `
+            <tr class="hover:bg-slate-50/50 border-t border-slate-100">
+              <td class="px-5 py-3 font-mono text-xs font-bold text-blue-600">${escHtml(it.itemCode)}</td>
+              <td class="px-5 py-3 font-semibold text-slate-800">${escHtml(name)}</td>
+              <td class="px-5 py-3 text-right font-bold text-green-600">${it.qty}</td>
+            </tr>
+          `;
+        }).join('')}
+      `).join('');
 
       document.getElementById('actual-detail-overlay').classList.add('active');
     }
@@ -1885,52 +2300,75 @@
     let activeProdId = null;
     function openAddActualProd(id) {
       activeProdId = id;
+      so2Production = loadFromLocal(LS_KEYS.so2Production, []);
       const p = so2Production.find(x => x.id === id);
+      if (!p) { showToast('Production order not found.', 'error'); return; }
       document.getElementById('actual-prod-title').textContent = `Actual Production: ${id}`;
       const tbody = document.getElementById('actual-prod-form-body');
-      tbody.innerHTML = p.items.map((it, idx) => {
-        const item = items.find(i => i.code === it.itemCode);
-        let detailRows = '';
-        if (it.details) {
-          it.details.forEach(det => {
+      const groupedItems = groupRowsByItemGroup(p.items || []);
+      tbody.innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-50 border-t border-slate-100">
+          <td colspan="3" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedItems[groupName].map((it, idxInGroup) => {
+          const actualIndex = `${groupName.replace(/[^a-z0-9]/gi, '_')}_${idxInGroup}`;
+          const item = items.find(i => i.code === it.itemCode);
+          let detailRows = '';
+          if (it.details) {
+            it.details.forEach(det => {
+              detailRows += `
+                <tr class="actual-child-${actualIndex} hidden bg-slate-50/50">
+                  <td class="p-3 pl-12 text-xs text-slate-600"><i class="fas fa-level-up-alt rotate-90 mr-2 text-slate-300"></i>${escHtml(det.customerName)} - ${escHtml(det.store)}</td>
+                  <td class="p-3 text-right text-xs font-mono text-slate-400">${det.qty}</td>
+                  <td></td>
+                </tr>`;
+            });
+          }
+          if (it.inhouse > 0) {
             detailRows += `
-              <tr class="actual-child-${idx} hidden bg-slate-50/50">
-                <td class="p-3 pl-12 text-xs text-slate-600"><i class="fas fa-level-up-alt rotate-90 mr-2 text-slate-300"></i>${escHtml(det.customerName)} - ${escHtml(det.store)}</td>
-                <td class="p-3 text-right text-xs font-mono text-slate-400">${det.qty}</td>
+              <tr class="actual-child-${actualIndex} hidden bg-blue-50/20">
+                <td class="p-3 pl-12 text-xs text-blue-600"><i class="fas fa-warehouse mr-2"></i>In-house / Buffer</td>
+                <td class="p-3 text-right text-xs font-mono text-blue-400">${it.inhouse}</td>
                 <td></td>
               </tr>`;
-          });
-        }
-        if (it.inhouse > 0) {
-          detailRows += `
-            <tr class="actual-child-${idx} hidden bg-blue-50/20">
-              <td class="p-3 pl-12 text-xs text-blue-600"><i class="fas fa-warehouse mr-2"></i>In-house / Buffer</td>
-              <td class="p-3 text-right text-xs font-mono text-blue-400">${it.inhouse}</td>
-              <td></td>
-            </tr>`;
-        }
+          }
 
-        return `
-          <tr class="hover:bg-slate-50/80 cursor-pointer border-t border-slate-100" onclick="toggleActualRow(${idx})">
-            <td class="p-5 font-bold text-slate-800">
-              <button class="w-6 h-6 rounded bg-slate-100 text-slate-500 mr-2 hover:bg-blue-100 hover:text-blue-600 transition" id="actual-btn-${idx}"><i class="fas fa-plus"></i></button>
-              ${escHtml(item.name)} <span class="text-[10px] text-slate-400 ml-1">${escHtml(it.itemCode)}</span>
-            </td>
-            <td class="p-5 text-right font-mono text-slate-500">${it.qty}</td>
-            <td class="p-5 text-right">
-              <input type="number" class="actual-input w-full p-2 bg-white border border-slate-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-blue-500" data-code="${it.itemCode}" value="${it.qty}" onclick="event.stopPropagation()">
-            </td>
-          </tr>
-          ${detailRows}
-        `;
-      }).join('');
+          return `
+            <tr class="hover:bg-slate-50/80 cursor-pointer border-t border-slate-100" onclick="toggleActualRow('${actualIndex}')">
+              <td class="p-5 font-bold text-slate-800">
+                <button class="w-6 h-6 rounded bg-slate-100 text-slate-500 mr-2 hover:bg-blue-100 hover:text-blue-600 transition" id="actual-btn-${actualIndex}"><i class="fas fa-plus"></i></button>
+                ${escHtml(item ? item.name : it.itemCode)} <span class="text-[10px] text-slate-400 ml-1">${escHtml(it.itemCode)}</span>
+              </td>
+              <td class="p-5 text-right font-mono text-slate-500">${it.qty}</td>
+              <td class="p-5 text-right">
+                <input type="number" class="actual-input w-full p-2 bg-white border border-slate-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-blue-500" data-code="${escHtml(it.itemCode)}" data-item-group="${escHtml(it.itemGroup || 'undecided')}" value="${it.qty}" onclick="event.stopPropagation()">
+              </td>
+            </tr>
+            ${detailRows}
+          `;
+        }).join('')}
+      `).join('');
       switchPage('page-producer-actual-add');
     }
 
+    function toggleActualRow(index) {
+      const rows = document.querySelectorAll('.actual-child-' + index);
+      const btn = document.getElementById('actual-btn-' + index);
+      if (!rows.length || !btn) return;
+      const shouldExpand = rows[0].classList.contains('hidden');
+      rows.forEach(row => row.classList.toggle('hidden', !shouldExpand));
+      btn.innerHTML = shouldExpand ? '<i class="fas fa-minus"></i>' : '<i class="fas fa-plus"></i>';
+      btn.classList.toggle('bg-blue-100', shouldExpand);
+      btn.classList.toggle('text-blue-600', shouldExpand);
+    }
+
     function saveActualProduction() {
+      so2Production = loadFromLocal(LS_KEYS.so2Production, []);
       const p = so2Production.find(x => x.id === activeProdId);
+      if (!p) { showToast('Production order not found.', 'error'); return; }
       const actuals = Array.from(document.querySelectorAll('.actual-input')).map(input => ({
         itemCode: input.dataset.code,
+        itemGroup: input.dataset.itemGroup || 'undecided',
         qty: parseInt(input.value) || 0
       }));
 
@@ -2055,7 +2493,7 @@
             <td class="p-5 text-right font-mono text-slate-500">${it.qty}</td>
             <td class="p-5 text-right font-mono text-green-600 font-bold">${qtyReceived}</td>
             <td class="p-5 text-right">
-              <input type="number" class="do-qty-input w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-blue-500" data-code="${it.itemCode}" value="${qtyReceived}">
+              <input type="number" class="do-qty-input w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-blue-500" data-code="${it.itemCode}" data-item-group="${escHtml(it.itemGroup || 'undecided')}" value="${qtyReceived}">
             </td>
           </tr>
         `;
@@ -2072,6 +2510,7 @@
 
       const doItems = Array.from(document.querySelectorAll('.do-qty-input')).map(input => ({
         itemCode: input.dataset.code,
+        itemGroup: input.dataset.itemGroup || 'undecided',
         qty: parseInt(input.value) || 0
       }));
 
@@ -2119,7 +2558,7 @@
             <td class="p-4 font-mono text-xs font-black text-blue-600 cursor-pointer hover:underline" onclick="openBillingView('${escHtml(b.id)}')">${escHtml(b.id)}</td>
           <td class="p-4">
             <div class="text-[11px] font-bold text-slate-800">${escHtml(b.store)}</div>
-            <div class="text-[10px] text-slate-400">${escHtml(b.date)}</div>
+            <div class="text-[10px] text-slate-400">${escHtml(b.date)} | ${(b.sourceDOs || [b.sourceDO]).filter(Boolean).length} DO</div>
           </td>
           <td class="p-4 text-right">
             <div class="font-black text-slate-900 text-xs">Rp ${b.grandTotal.toLocaleString()}</div>
@@ -2134,7 +2573,9 @@
     }
 
     let activeBillingData = null;
-    function openAddBilling(preSelectedDOId = '') {
+    let billingOpenDOs = [];
+    let billingFilteredDOs = [];
+    function openAddBillingLegacy(preSelectedDOId = '') {
       const openDOs = deliveryOrders.filter(d => d.status === 'Open');
       if (!openDOs.length) { showToast('No Open Delivery Orders found.', 'info'); return; }
 
@@ -2161,7 +2602,7 @@
         const soItem = so.items.find(x => x.itemCode === it.itemCode);
         const price = soItem ? soItem.price : 0;
         return `
-          <tr class="billing-item-row" data-code="${it.itemCode}" data-price="${price}">
+          <tr class="billing-item-row" data-code="${it.itemCode}" data-item-group="${escHtml(it.itemGroup || 'undecided')}" data-price="${price}">
             <td class="px-5 py-3">
               <div class="font-bold text-slate-800">${escHtml(itemMaster ? itemMaster.name : it.itemCode)}</div>
               <div class="text-[10px] font-mono text-slate-400">${escHtml(it.itemCode)}</div>
@@ -2188,16 +2629,17 @@
         row.querySelector('.billing-row-subtotal').textContent = rowSub.toLocaleString();
         subtotal += rowSub;
       });
-      const tax = subtotal * (activeBillingData.ppnRate / 100);
       const potongan = parseFloat(document.getElementById('billing-potongan-input').value) || 0;
-      const grand = subtotal + tax - potongan;
+      const taxableAmount = Math.max(0, subtotal - potongan);
+      const tax = taxableAmount * (activeBillingData.ppnRate / 100);
+      const grand = taxableAmount + tax;
 
       document.getElementById('billing-sub-display').textContent = 'Rp ' + subtotal.toLocaleString();
       document.getElementById('billing-tax-display').textContent = `Rp ${tax.toLocaleString()} (${activeBillingData.ppnRate}%)`;
       document.getElementById('billing-grand-display').textContent = 'Rp ' + grand.toLocaleString();
     }
 
-    function confirmSaveBilling() {
+    function confirmSaveBillingLegacy() {
       if (!activeBillingData) return;
       const billDate = document.getElementById('billing-date-input').value;
       const potongan = parseFloat(document.getElementById('billing-potongan-input').value) || 0;
@@ -2208,14 +2650,15 @@
         const price = parseFloat(row.dataset.price) || 0;
         const qty = parseInt(row.querySelector('.billing-qty-input').value) || 0;
         if (qty > 0) {
-          billingItems.push({ itemCode: code, qty, price });
+          billingItems.push({ itemCode: code, itemGroup: row.dataset.itemGroup || getItemGroupName(code), qty, price });
           subtotal += qty * price;
         }
       });
 
       if (billingItems.length === 0) { showToast('Cannot save empty billing.', 'error'); return; }
-      const tax = subtotal * (activeBillingData.ppnRate / 100);
-      const grandTotal = subtotal + tax - potongan;
+      const taxableAmount = Math.max(0, subtotal - potongan);
+      const tax = taxableAmount * (activeBillingData.ppnRate / 100);
+      const grandTotal = taxableAmount + tax;
 
       const billDoc = {
         id: 'BILL-' + Date.now(),
@@ -2255,8 +2698,9 @@
       if (!b) { showToast('Billing record not found.', 'error'); return; }
 
       document.getElementById('billing-view-title').textContent = b.id;
+      const billingSourceDOs = (b.sourceDOs || [b.sourceDO]).filter(Boolean);
       document.getElementById('billing-view-meta').textContent =
-        `${b.store}${b.customerName ? ' · ' + b.customerName : ''} · ${b.date}`;
+        `${b.store}${b.customerName ? ' | ' + b.customerName : ''} | ${b.date} | ${billingSourceDOs.length} Delivery Order${billingSourceDOs.length !== 1 ? 's' : ''}`;
 
       const tbody = document.getElementById('billing-view-body');
       tbody.innerHTML = b.items.map(it => {
@@ -2293,28 +2737,500 @@
       document.getElementById('billing-detail-overlay').classList.remove('active');
     }
 
+    // Multi-DO billing flow. These declarations intentionally replace the legacy single-DO handlers above.
+    function openAddBilling(preSelectedDOId = '') {
+      deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+      so2Store = loadFromLocal(LS_KEYS.so2Store, []);
+      billingOpenDOs = deliveryOrders.filter(d => d.status === 'Open');
+      if (!billingOpenDOs.length) { showToast('No Open Delivery Orders found.', 'info'); return; }
+
+      const preSelectedDO = preSelectedDOId ? billingOpenDOs.find(d => d.id === preSelectedDOId) : null;
+      activeBillingData = { selectedDOIds: new Set(), ppnRate: 11 };
+
+      document.getElementById('billing-form-title').textContent = 'Create New Billing';
+      document.getElementById('billing-form-meta').textContent = 'Select a store and one or more Delivery Orders';
+      document.getElementById('billing-date-input').value = getLocalDateString();
+      document.getElementById('billing-potongan-input').value = 0;
+      document.getElementById('billing-customer-select').value = '';
+      document.getElementById('billing-store-search').value = '';
+      document.getElementById('billing-do-date-from').value = '';
+      document.getElementById('billing-do-date-to').value = '';
+
+      renderBillingCustomerOptions(preSelectedDO ? preSelectedDO.customerName : '');
+      renderBillingStoreOptions(preSelectedDO ? preSelectedDO.store : '');
+      if (preSelectedDO) {
+        document.getElementById('billing-customer-select').value = preSelectedDO.customerName || '';
+        document.getElementById('billing-store-select').value = preSelectedDO.store;
+        activeBillingData.selectedDOIds.add(preSelectedDO.id);
+      }
+      filterBillingDOs();
+      document.getElementById('billing-form-overlay').classList.add('active');
+    }
+
+    function getLocalDateString(date = new Date()) {
+      return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    }
+
+    function renderBillingCustomerOptions(preferredCustomer = '') {
+      const select = document.getElementById('billing-customer-select');
+      const customerNames = [...new Set(billingOpenDOs.map(d => d.customerName).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+      select.innerHTML = '<option value="">Select Customer</option>' +
+        customerNames.map(name => `<option value="${escHtml(name)}">${escHtml(name)}</option>`).join('');
+      if (customerNames.includes(preferredCustomer)) select.value = preferredCustomer;
+    }
+
+    function onBillingCustomerChange() {
+      if (!activeBillingData) return;
+      activeBillingData.selectedDOIds.clear();
+      document.getElementById('billing-store-select').value = '';
+      renderBillingStoreOptions();
+      filterBillingDOs();
+    }
+
+    function renderBillingStoreOptions(preferredStore = '') {
+      if (!activeBillingData) return;
+      const select = document.getElementById('billing-store-select');
+      const currentStore = preferredStore || select.value;
+      const customerName = document.getElementById('billing-customer-select').value;
+      const query = document.getElementById('billing-store-search').value.trim().toLowerCase();
+      const stores = [...new Set(billingOpenDOs
+        .filter(d => !customerName || d.customerName === customerName)
+        .map(d => d.store))]
+        .filter(store => store.toLowerCase().includes(query))
+        .sort((a, b) => a.localeCompare(b));
+
+      select.innerHTML = '<option value="">Select Store</option>' +
+        stores.map(store => `<option value="${escHtml(store)}">${escHtml(store)}</option>`).join('');
+
+      if (stores.includes(currentStore)) {
+        select.value = currentStore;
+      } else if (currentStore) {
+        activeBillingData.selectedDOIds.clear();
+        filterBillingDOs();
+      }
+    }
+
+    function filterBillingDOs() {
+      if (!activeBillingData) return;
+      const customerName = document.getElementById('billing-customer-select').value;
+      const store = document.getElementById('billing-store-select').value;
+      const dateFrom = document.getElementById('billing-do-date-from').value;
+      const dateTo = document.getElementById('billing-do-date-to').value;
+      billingFilteredDOs = billingOpenDOs.filter(d =>
+        d.customerName === customerName &&
+        d.store === store &&
+        (!dateFrom || d.date >= dateFrom) &&
+        (!dateTo || d.date <= dateTo)
+      );
+
+      const validIds = new Set(billingFilteredDOs.map(d => d.id));
+      activeBillingData.selectedDOIds.forEach(id => {
+        if (!validIds.has(id)) activeBillingData.selectedDOIds.delete(id);
+      });
+
+      const checklist = document.getElementById('billing-do-checklist');
+      if (!customerName) {
+        checklist.innerHTML = '<div class="p-8 text-center text-xs text-slate-400">Select a Customer first.</div>';
+      } else if (!store) {
+        checklist.innerHTML = '<div class="p-8 text-center text-xs text-slate-400">Select a Store to view Delivery Orders.</div>';
+      } else if (!billingFilteredDOs.length) {
+        checklist.innerHTML = '<div class="p-8 text-center text-xs text-slate-400">No open Delivery Orders match this filter.</div>';
+      } else {
+        checklist.innerHTML = billingFilteredDOs.map(d => `
+          <label class="flex items-start gap-3 px-5 py-4 border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer">
+            <input type="checkbox" class="billing-do-checkbox mt-0.5 w-4 h-4 accent-blue-600"
+              value="${escHtml(d.id)}" ${activeBillingData.selectedDOIds.has(d.id) ? 'checked' : ''}
+              onchange="updateBillingDOSelection()">
+            <span class="min-w-0 flex-1">
+              <span class="block font-mono text-[11px] font-black text-blue-600">${escHtml(d.id)}</span>
+              <span class="block text-xs font-bold text-slate-700 mt-0.5">${escHtml(d.date)}</span>
+              <span class="block text-[10px] text-slate-400">${d.items.length} item line${d.items.length !== 1 ? 's' : ''}</span>
+            </span>
+          </label>`).join('');
+      }
+      renderSelectedBillingItems();
+    }
+
+    function toggleAllBillingDOs(button) {
+      if (!activeBillingData || !billingFilteredDOs.length) return;
+      const shouldSelectAll = billingFilteredDOs.some(d => !activeBillingData.selectedDOIds.has(d.id));
+      billingFilteredDOs.forEach(d => {
+        if (shouldSelectAll) activeBillingData.selectedDOIds.add(d.id);
+        else activeBillingData.selectedDOIds.delete(d.id);
+      });
+      button.textContent = shouldSelectAll ? 'Clear All' : 'Select All';
+      filterBillingDOs();
+    }
+
+    function updateBillingDOSelection() {
+      if (!activeBillingData) return;
+      activeBillingData.selectedDOIds = new Set(
+        Array.from(document.querySelectorAll('.billing-do-checkbox:checked')).map(input => input.value)
+      );
+      renderSelectedBillingItems();
+    }
+
+    function renderSelectedBillingItems() {
+      if (!activeBillingData) return;
+      const selectedDOs = billingOpenDOs.filter(d => activeBillingData.selectedDOIds.has(d.id));
+      const tbody = document.getElementById('billing-form-body');
+
+      if (!selectedDOs.length) {
+        activeBillingData.ppnRate = 11;
+        document.getElementById('billing-form-meta').textContent = 'Select a store and one or more Delivery Orders';
+        tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-10 text-center text-slate-400 italic">Select Delivery Orders to load billing items.</td></tr>';
+        calculateBillingTotals();
+        return;
+      }
+
+      const firstDO = selectedDOs[0];
+      const cust = customers.find(c => c.name === firstDO.customerName);
+      const storeObj = cust ? cust.stores.find(s => s.name === firstDO.store) : null;
+      activeBillingData.ppnRate = storeObj ? storeObj.ppn : 11;
+      document.getElementById('billing-form-meta').textContent =
+        `${firstDO.customerName || 'Customer'} | ${firstDO.store} | ${selectedDOs.length} Delivery Order${selectedDOs.length !== 1 ? 's' : ''} selected`;
+
+      const allSOs = [...salesOrders, ...so2Store];
+      const aggregatedItems = new Map();
+      selectedDOs.forEach(doDoc => {
+        const so = allSOs.find(s => s.id === doDoc.sourceSO);
+        doDoc.items.forEach(it => {
+          const soItem = so && so.items ? so.items.find(x => x.itemCode === it.itemCode) : null;
+          const price = soItem ? Number(soItem.price) || 0 : 0;
+          const key = `${it.itemCode}::${price}`;
+          const existing = aggregatedItems.get(key) || { itemCode: it.itemCode, itemGroup: it.itemGroup || 'undecided', price, qty: 0 };
+          existing.qty += Number(it.qty) || 0;
+          aggregatedItems.set(key, existing);
+        });
+      });
+
+      tbody.innerHTML = Array.from(aggregatedItems.values()).map(it => {
+        const itemMaster = items.find(i => i.code === it.itemCode);
+        return `
+          <tr class="billing-item-row" data-code="${escHtml(it.itemCode)}" data-item-group="${escHtml(it.itemGroup || 'undecided')}" data-price="${it.price}">
+            <td class="px-5 py-3">
+              <div class="font-bold text-slate-800">${escHtml(itemMaster ? itemMaster.name : it.itemCode)}</div>
+              <div class="text-[10px] font-mono text-slate-400">${escHtml(it.itemCode)}</div>
+            </td>
+            <td class="px-5 py-3 text-right font-mono text-slate-500 text-xs">${it.price.toLocaleString()}</td>
+            <td class="px-5 py-3 text-right">
+              <input type="number" min="0" class="billing-qty-input w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                value="${it.qty}" oninput="calculateBillingTotals()">
+            </td>
+            <td class="px-5 py-3 text-right font-black text-slate-800 billing-row-subtotal">0</td>
+          </tr>`;
+      }).join('');
+      calculateBillingTotals();
+    }
+
+    function confirmSaveBilling() {
+      if (!activeBillingData) return;
+      const selectedDOs = billingOpenDOs.filter(d => activeBillingData.selectedDOIds.has(d.id));
+      if (!selectedDOs.length) { showToast('Select at least one Delivery Order.', 'error'); return; }
+
+      const billDate = document.getElementById('billing-date-input').value;
+      if (!billDate) { showToast('Invoice date is required.', 'error'); return; }
+      const potongan = parseFloat(document.getElementById('billing-potongan-input').value) || 0;
+      const billingItems = [];
+      let subtotal = 0;
+      document.querySelectorAll('.billing-item-row').forEach(row => {
+        const code = row.dataset.code;
+        const price = parseFloat(row.dataset.price) || 0;
+        const qty = parseInt(row.querySelector('.billing-qty-input').value) || 0;
+        if (qty > 0) {
+          billingItems.push({ itemCode: code, itemGroup: row.dataset.itemGroup || getItemGroupName(code), qty, price });
+          subtotal += qty * price;
+        }
+      });
+
+      if (!billingItems.length) { showToast('Cannot save empty billing.', 'error'); return; }
+      const taxableAmount = Math.max(0, subtotal - potongan);
+      const tax = taxableAmount * (activeBillingData.ppnRate / 100);
+      const grandTotal = taxableAmount + tax;
+      const billDoc = {
+        id: 'BILL-' + Date.now(),
+        sourceDO: selectedDOs[0].id,
+        sourceDOs: selectedDOs.map(d => d.id),
+        store: selectedDOs[0].store,
+        customerName: selectedDOs[0].customerName,
+        items: billingItems,
+        subtotal,
+        tax,
+        potongan,
+        grandTotal,
+        date: billDate
+      };
+
+      billings.push(billDoc);
+      selectedDOs.forEach(selectedDO => {
+        const doDoc = deliveryOrders.find(d => d.id === selectedDO.id);
+        if (doDoc) doDoc.status = 'Invoiced';
+      });
+      saveToLocal(LS_KEYS.billings, billings);
+      saveToLocal(LS_KEYS.deliveryOrders, deliveryOrders);
+
+      showToast(`Billing ${billDoc.id} generated from ${selectedDOs.length} Delivery Order${selectedDOs.length !== 1 ? 's' : ''}.`);
+      closeBillingForm();
+      renderBillingList();
+    }
+
+    // Billing page flow aligned with Credit Note screen.
+    let activeBillingPageData = null;
+
+    function renderBillingList() {
+      initBillingPage();
+    }
+
+    function initBillingPage() {
+      deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
+      billings = loadFromLocal(LS_KEYS.billings, []);
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+      so2Store = loadFromLocal(LS_KEYS.so2Store, []);
+      billingOpenDOs = deliveryOrders.filter(d => d.status === 'Open');
+
+      const customerSelect = document.getElementById('bill-page-customer-select');
+      const currentCustomer = customerSelect.value;
+      const customerNames = [...new Set(billingOpenDOs.map(d => d.customerName).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+      customerSelect.innerHTML = '<option value="">Select Customer</option>' +
+        customerNames.map(name => `<option value="${escHtml(name)}">${escHtml(name)}</option>`).join('');
+      if (customerNames.includes(currentCustomer)) customerSelect.value = currentCustomer;
+
+      renderBillingPageStoreOptions();
+      if (!document.getElementById('bill-page-document-date').value) {
+        document.getElementById('bill-page-document-date').value = getLocalDateString();
+      }
+      activeBillingPageData = null;
+      resetBillingPagePreview();
+      renderBillingHistory();
+    }
+
+    function onBillingPageCustomerChange() {
+      renderBillingPageStoreOptions();
+      resetBillingPagePreview();
+    }
+
+    function renderBillingPageStoreOptions() {
+      const customerName = document.getElementById('bill-page-customer-select').value;
+      const storeSelect = document.getElementById('bill-page-store-select');
+      const currentStore = storeSelect.value;
+      const stores = [...new Set(billingOpenDOs
+        .filter(d => !customerName || d.customerName === customerName)
+        .map(d => d.store))]
+        .sort((a, b) => a.localeCompare(b));
+      storeSelect.innerHTML = '<option value="">Select Store</option>' +
+        stores.map(store => `<option value="${escHtml(store)}">${escHtml(store)}</option>`).join('');
+      if (stores.includes(currentStore)) storeSelect.value = currentStore;
+    }
+
+    function resetBillingPagePreview(message = 'Choose a customer, store, and DO period.') {
+      const body = document.getElementById('bill-page-preview-body');
+      if (body) body.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">${message}</td></tr>`;
+      document.getElementById('bill-page-preview-meta').textContent = message;
+      document.getElementById('bill-page-preview-total').textContent = 'Rp 0';
+      document.getElementById('bill-page-subtotal').textContent = 'Rp 0';
+      document.getElementById('bill-page-potongan-display').textContent = 'Rp 0';
+      document.getElementById('bill-page-tax').textContent = 'Rp 0';
+      activeBillingPageData = null;
+    }
+
+    function generateBillingPreview() {
+      const customerName = document.getElementById('bill-page-customer-select').value;
+      const store = document.getElementById('bill-page-store-select').value;
+      const fromDate = document.getElementById('bill-page-date-from').value;
+      const toDate = document.getElementById('bill-page-date-to').value;
+      const documentDate = document.getElementById('bill-page-document-date').value;
+
+      if (!customerName || !store || !fromDate || !toDate || !documentDate) {
+        resetBillingPagePreview('Complete the Customer, Store, period, and Billing date.');
+        return;
+      }
+      if (fromDate > toDate) {
+        showToast('DO From date cannot be after DO To date.', 'error');
+        return;
+      }
+
+      deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+      so2Store = loadFromLocal(LS_KEYS.so2Store, []);
+      const matchedDOs = deliveryOrders.filter(doc =>
+        doc.status === 'Open' &&
+        doc.customerName === customerName &&
+        doc.store === store &&
+        doc.date >= fromDate &&
+        doc.date <= toDate
+      );
+
+      if (!matchedDOs.length) {
+        resetBillingPagePreview('No open Delivery Orders found for this filter.');
+        return;
+      }
+
+      const allSOs = [...salesOrders, ...so2Store];
+      const grouped = new Map();
+      const missingPrices = [];
+      matchedDOs.forEach(doDoc => {
+        const so = allSOs.find(s => s.id === doDoc.sourceSO);
+        doDoc.items.forEach(row => {
+          const soItem = so && so.items ? so.items.find(x => x.itemCode === row.itemCode) : null;
+          const price = soItem ? Number(soItem.price) || 0 : 0;
+          const key = `${row.itemCode}::${price}`;
+          const existing = grouped.get(key) || { itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: 0, price, amount: 0 };
+          existing.qty += Number(row.qty) || 0;
+          existing.amount = existing.qty * existing.price;
+          grouped.set(key, existing);
+          if (!price && !missingPrices.includes(row.itemCode)) missingPrices.push(row.itemCode);
+        });
+      });
+
+      const itemsData = Array.from(grouped.values());
+      const subtotal = itemsData.reduce((sum, row) => sum + row.amount, 0);
+      const cust = customers.find(c => c.name === customerName);
+      const storeObj = cust ? cust.stores.find(s => s.name === store) : null;
+      const ppnRate = storeObj ? storeObj.ppn : 11;
+      activeBillingPageData = {
+        customerName,
+        store,
+        fromDate,
+        toDate,
+        documentDate,
+        sourceDOIds: matchedDOs.map(doc => doc.id),
+        items: itemsData,
+        subtotal,
+        ppnRate,
+        missingPrices
+      };
+
+      document.getElementById('bill-page-preview-body').innerHTML = renderGroupedAmountRows(itemsData);
+      document.getElementById('bill-page-preview-meta').textContent =
+        `${matchedDOs.length} Delivery Order document${matchedDOs.length !== 1 ? 's' : ''} | Billing date: ${documentDate}`;
+      recalculateBillingPreviewTotals();
+    }
+
+    function recalculateBillingPreviewTotals() {
+      if (!activeBillingPageData) {
+        document.getElementById('bill-page-preview-total').textContent = 'Rp 0';
+        document.getElementById('bill-page-subtotal').textContent = 'Rp 0';
+        document.getElementById('bill-page-potongan-display').textContent = 'Rp 0';
+        document.getElementById('bill-page-tax').textContent = 'Rp 0';
+        return;
+      }
+      const potongan = parseFloat(document.getElementById('bill-page-potongan').value) || 0;
+      const taxableAmount = Math.max(0, activeBillingPageData.subtotal - potongan);
+      const tax = taxableAmount * (activeBillingPageData.ppnRate / 100);
+      const grandTotal = taxableAmount + tax;
+      activeBillingPageData.potongan = potongan;
+      activeBillingPageData.tax = tax;
+      activeBillingPageData.grandTotal = grandTotal;
+      document.getElementById('bill-page-subtotal').textContent = 'Rp ' + activeBillingPageData.subtotal.toLocaleString();
+      document.getElementById('bill-page-potongan-display').textContent = '- Rp ' + potongan.toLocaleString();
+      document.getElementById('bill-page-tax').textContent = `Rp ${tax.toLocaleString()} (${activeBillingPageData.ppnRate}%)`;
+      document.getElementById('bill-page-preview-total').textContent = 'Rp ' + grandTotal.toLocaleString();
+    }
+
+    function saveBillingFromPage() {
+      if (!activeBillingPageData) { showToast('Load Delivery Orders first.', 'error'); return; }
+      if (activeBillingPageData.missingPrices.length) {
+        showToast(`Price not found for: ${activeBillingPageData.missingPrices.join(', ')}`, 'error');
+        return;
+      }
+      recalculateBillingPreviewTotals();
+
+      const billDoc = {
+        id: 'BILL-' + Date.now(),
+        sourceDO: activeBillingPageData.sourceDOIds[0],
+        sourceDOs: [...activeBillingPageData.sourceDOIds],
+        store: activeBillingPageData.store,
+        customerName: activeBillingPageData.customerName,
+        items: activeBillingPageData.items.map(row => ({ itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: row.qty, price: row.price })),
+        subtotal: activeBillingPageData.subtotal,
+        tax: activeBillingPageData.tax,
+        potongan: activeBillingPageData.potongan || 0,
+        grandTotal: activeBillingPageData.grandTotal,
+        date: activeBillingPageData.documentDate
+      };
+
+      billings = loadFromLocal(LS_KEYS.billings, []);
+      deliveryOrders = loadFromLocal(LS_KEYS.deliveryOrders, []);
+      billings.push(billDoc);
+      deliveryOrders.forEach(doc => {
+        if (billDoc.sourceDOs.includes(doc.id)) doc.status = 'Invoiced';
+      });
+      saveToLocal(LS_KEYS.billings, billings);
+      saveToLocal(LS_KEYS.deliveryOrders, deliveryOrders);
+      showToast(`Billing ${billDoc.id} created from ${billDoc.sourceDOs.length} Delivery Order${billDoc.sourceDOs.length !== 1 ? 's' : ''}.`);
+      initBillingPage();
+    }
+
+    function renderBillingHistory() {
+      billings = loadFromLocal(LS_KEYS.billings, []);
+      const tbody = document.getElementById('billing-list-body');
+      if (!tbody) return;
+      if (!billings.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No Billing documents.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = [...billings].reverse().map(doc => {
+        const sourceDOs = (doc.sourceDOs || [doc.sourceDO]).filter(Boolean);
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="p-4 font-mono text-xs font-black text-blue-600">${escHtml(doc.id)}</td>
+            <td class="p-4 font-semibold text-slate-600">${escHtml(doc.date)}</td>
+            <td class="p-4 font-bold text-slate-800">${escHtml(doc.store)}</td>
+            <td class="p-4 text-center font-bold text-slate-600">${sourceDOs.length}</td>
+            <td class="p-4 text-right font-black text-slate-900">Rp ${(doc.grandTotal || 0).toLocaleString()}</td>
+            <td class="p-4 text-right">
+              <button onclick="openBillingView('${escHtml(doc.id)}')" class="text-xs text-blue-600 font-bold hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                <i class="fas fa-eye mr-1"></i>View
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
     // =============================================================
     //  PRICE LIST MANAGEMENT
     // =============================================================
     function renderPriceLists() {
+      priceLists = loadFromLocal(LS_KEYS.priceLists, []);
       const tbody = document.getElementById('price-list-body');
       if (!priceLists.length) {
         tbody.innerHTML = `<tr><td colspan="4" class="py-14 text-center text-slate-400 italic">No price lists created yet.</td></tr>`;
         return;
       }
+      const todayStr = getLocalDateString();
       const sorted = [...priceLists].reverse();
-      tbody.innerHTML = sorted.map(pl => `
-        <tr class="hover:bg-slate-50/50 transition">
-          <td class="p-5 font-mono text-xs font-black text-blue-600">${escHtml(pl.id)}</td>
-          <td class="p-5 text-slate-600 font-semibold text-sm">${escHtml(pl.fromDate)} <i class="fas fa-arrow-right mx-2 text-[10px] text-slate-300"></i> ${escHtml(pl.toDate)}</td>
-          <td class="p-5">
-            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">${pl.stores.length} Stores</span>
-          </td>
-          <td class="p-5 text-right">
-            <button onclick="deletePriceList('${pl.id}')" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = sorted.map(pl => {
+        const isActive = todayStr >= pl.fromDate && todayStr <= pl.toDate;
+        return `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-5">
+              <div class="font-mono text-xs font-black text-blue-600">${escHtml(pl.id)}</div>
+              <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}">
+                ${isActive ? 'Active' : 'Inactive'}
+              </div>
+            </td>
+            <td class="p-5 text-slate-600 font-semibold text-sm">${escHtml(pl.fromDate)} <i class="fas fa-arrow-right mx-2 text-[10px] text-slate-300"></i> ${escHtml(pl.toDate)}</td>
+            <td class="p-5">
+              <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">${pl.stores.length} Stores</span>
+            </td>
+            <td class="p-5 text-right">
+              <div class="inline-flex items-center justify-end gap-2">
+                <button onclick="viewPriceList('${escHtml(pl.id)}')" title="View price list"
+                  class="w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 transition">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button onclick="deletePriceList('${escHtml(pl.id)}')" title="Delete price list"
+                  class="w-8 h-8 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function openAddPriceList() {
@@ -2339,19 +3255,25 @@
 
       // Render Items
       const itemTable = document.getElementById('pl-item-prices');
-      itemTable.innerHTML = items.map(i => `
-        <tr>
-          <td class="p-4">
-            <div class="font-bold text-slate-800 text-sm">${escHtml(i.name)}</div>
-            <div class="text-[10px] font-mono text-slate-400">${escHtml(i.code)}</div>
-          </td>
-          <td class="p-4 text-right">
-            <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-blue-500 transition">
-              <span class="text-xs font-bold text-slate-400">Rp</span>
-              <input type="number" class="pl-item-price-input w-24 bg-transparent outline-none text-right font-black text-slate-700" data-code="${i.code}" placeholder="0">
-            </div>
-          </td>
+      const groupedItems = groupItemsByItemGroup(items);
+      itemTable.innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="2" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
         </tr>
+        ${groupedItems[groupName].map(i => `
+          <tr>
+            <td class="p-4">
+              <div class="font-bold text-slate-800 text-sm">${escHtml(i.name)}</div>
+              <div class="text-[10px] font-mono text-slate-400">${escHtml(i.code)}</div>
+            </td>
+            <td class="p-4 text-right">
+              <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-blue-500 transition">
+                <span class="text-xs font-bold text-slate-400">Rp</span>
+                <input type="number" class="pl-item-price-input w-24 bg-transparent outline-none text-right font-black text-slate-700" data-code="${i.code}" placeholder="0">
+              </div>
+            </td>
+          </tr>
+        `).join('')}
       `).join('');
 
       renderPLStoreSelection();
@@ -2431,6 +3353,47 @@
       priceLists = priceLists.filter(pl => pl.id !== id);
       saveToLocal(LS_KEYS.priceLists, priceLists);
       renderPriceLists();
+    }
+
+    function viewPriceList(id) {
+      priceLists = loadFromLocal(LS_KEYS.priceLists, []);
+      const pl = priceLists.find(doc => doc.id === id);
+      if (!pl) { showToast('Price List not found.', 'error'); return; }
+
+      const todayStr = getLocalDateString();
+      const isActive = todayStr >= pl.fromDate && todayStr <= pl.toDate;
+      document.getElementById('price-list-detail-id').textContent = pl.id;
+      document.getElementById('price-list-detail-meta').textContent =
+        `${pl.fromDate} to ${pl.toDate} | ${pl.stores.length} Stores | ${isActive ? 'Active today' : 'Inactive today'}`;
+
+      document.getElementById('price-list-detail-stores').innerHTML = pl.stores.map(store => `
+        <span class="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-100 rounded-lg px-3 py-1 text-xs font-bold">
+          <i class="fas fa-store mr-1.5 text-[10px]"></i>${escHtml(store)}
+        </span>
+      `).join('');
+
+      const groupedItems = groupRowsByItemGroup([...pl.items].map(row => ({ ...row, itemGroup: getItemGroupName(row.itemCode) })));
+      document.getElementById('price-list-detail-body').innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="3" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedItems[groupName].sort((a, b) => a.itemCode.localeCompare(b.itemCode)).map(row => {
+          const item = items.find(i => i.code === row.itemCode);
+          return `
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-5 py-3 font-mono text-xs font-black text-blue-600">${escHtml(row.itemCode)}</td>
+              <td class="px-5 py-3 font-bold text-slate-800">${escHtml(item ? item.name : row.itemCode)}</td>
+              <td class="px-5 py-3 text-right font-black text-slate-900">Rp ${(row.price || 0).toLocaleString()}</td>
+            </tr>
+          `;
+        }).join('')}
+      `).join('');
+
+      document.getElementById('price-list-detail-overlay').classList.add('active');
+    }
+
+    function closePriceListDetail() {
+      document.getElementById('price-list-detail-overlay').classList.remove('active');
     }
 
     /**
@@ -2539,11 +3502,95 @@
     // =============================================================
     //  ITEM MASTER
     // =============================================================
+    function getItemGroupName(itemOrCode) {
+      const item = typeof itemOrCode === 'string' ? items.find(i => i.code === itemOrCode) : itemOrCode;
+      return item && item.itemGroup ? item.itemGroup : 'undecided';
+    }
+
+    function groupItemsByItemGroup(itemList) {
+      return itemList.reduce((groups, item) => {
+        const groupName = getItemGroupName(item);
+        if (!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push(item);
+        return groups;
+      }, {});
+    }
+
+    function groupRowsByItemGroup(rows) {
+      return rows.reduce((groups, row) => {
+        const groupName = row.itemGroup || 'undecided';
+        if (!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push(row);
+        return groups;
+      }, {});
+    }
+
+    function renderGroupedAmountRows(rows) {
+      const groupedRows = groupRowsByItemGroup(rows);
+      return Object.keys(groupedRows).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="4" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedRows[groupName].map(row => {
+          const item = items.find(i => i.code === row.itemCode);
+          return `
+            <tr>
+              <td class="p-4">
+                <div class="font-bold text-slate-800">${escHtml(item ? item.name : row.itemCode)}</div>
+                <div class="text-[10px] font-mono text-slate-400">${escHtml(row.itemCode)}</div>
+              </td>
+              <td class="p-4 text-right font-black text-slate-700">${row.qty}</td>
+              <td class="p-4 text-right font-mono ${row.price > 0 ? 'text-slate-600' : 'text-red-500 font-bold'}">${row.price > 0 ? 'Rp ' + row.price.toLocaleString() : 'Not Found'}</td>
+              <td class="p-4 text-right font-black text-slate-900">Rp ${(row.amount || 0).toLocaleString()}</td>
+            </tr>`;
+        }).join('')}
+      `).join('');
+    }
+
+    function renderItemGroupOptions() {
+      itemGroups = loadFromLocal(LS_KEYS.itemGroups, []);
+      const select = document.getElementById('item-group-select');
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = '<option value="">Select Group</option>' +
+        itemGroups.map(group => `<option value="${escHtml(group)}">${escHtml(group)}</option>`).join('');
+      if (itemGroups.includes(current)) select.value = current;
+    }
+
+    function addItemGroup() {
+      const input = document.getElementById('item-group-new');
+      const groupName = input.value.trim();
+      if (!groupName) { showToast('Item Group name is required.', 'error'); return; }
+      itemGroups = loadFromLocal(LS_KEYS.itemGroups, []);
+      if (itemGroups.some(group => group.toLowerCase() === groupName.toLowerCase())) {
+        showToast('Item Group already exists.', 'error');
+        return;
+      }
+      itemGroups.push(groupName);
+      itemGroups.sort((a, b) => a.localeCompare(b));
+      saveToLocal(LS_KEYS.itemGroups, itemGroups);
+      input.value = '';
+      renderItemGroupOptions();
+      const select = document.getElementById('item-group-select');
+      if (select) select.value = groupName;
+      renderItemTable();
+      showToast(`Item Group "${groupName}" added.`);
+    }
+
     function renderItemTable() {
+      itemGroups = loadFromLocal(LS_KEYS.itemGroups, []);
+      renderItemGroupOptions();
       document.getElementById('item-table-body').innerHTML = items.map((i, idx) => `
         <tr class="hover:bg-slate-50/50">
           <td class="p-5 font-mono text-xs font-bold text-blue-600">${escHtml(i.code)}</td>
           <td class="p-5 font-bold text-slate-800">${escHtml(i.name)}</td>
+          <td class="p-5">
+            <select onchange="updateItemGroup(${idx}, this.value)"
+              class="w-full max-w-48 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="" ${!i.itemGroup ? 'selected' : ''}>undecided</option>
+              ${itemGroups.map(group => `<option value="${escHtml(group)}" ${i.itemGroup === group ? 'selected' : ''}>${escHtml(group)}</option>`).join('')}
+            </select>
+          </td>
           <td class="p-5 text-sm font-medium text-slate-500">1 Pack &rarr; <span class="text-slate-900 font-bold">${i.conv} Units</span></td>
           <td class="p-5 text-right"><span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-xs font-bold">${escHtml(i.unit)}</span></td>
           <td class="p-5 text-right">
@@ -2557,15 +3604,25 @@
       const code = document.getElementById('item-code').value.trim();
       const name = document.getElementById('item-name').value.trim();
       const conv = parseInt(document.getElementById('item-conv').value) || 10;
+      const itemGroup = document.getElementById('item-group-select').value;
       if (!code || !name) { showToast('Item Code and Name are required.', 'error'); return; }
+      if (!itemGroup) { showToast('Please select an Item Group for new item.', 'error'); return; }
       if (items.find(i => i.code === code)) { showToast('Item code already exists!', 'error'); return; }
-      items.push({ code, name, conv, unit: 'Pcs' });
+      items.push({ code, name, conv, unit: 'Pcs', itemGroup });
       saveToLocal(LS_KEYS.items, items);
       document.getElementById('item-code').value = '';
       document.getElementById('item-name').value = '';
       document.getElementById('item-conv').value = 10;
+      document.getElementById('item-group-select').value = '';
       renderItemTable();
       showToast(`Item "${name}" added to master.`);
+    }
+
+    function updateItemGroup(idx, groupName) {
+      if (!items[idx]) return;
+      items[idx].itemGroup = groupName;
+      saveToLocal(LS_KEYS.items, items);
+      showToast(`Item group updated for ${items[idx].name}.`);
     }
 
     function removeItem(idx) {
@@ -2627,19 +3684,25 @@
 
       const tbody = document.getElementById('forecast-grid-body');
       const savedStore = forecastData[store] || {};
-      tbody.innerHTML = items.map(i => {
-        const savedRow = savedStore[i.code] || [0, 0, 0, 0, 0, 0, 0];
-        return `
-          <tr>
-            <td class="p-4 border border-slate-100 font-bold text-slate-700 bg-slate-50/30">${escHtml(i.name)}</td>
-            ${[0, 1, 2, 3, 4, 5, 6].map(day => `
-              <td class="border border-slate-100 text-center p-3">
-                <input type="number" class="forecast-input" data-item="${i.code}" data-day="${day}" placeholder="0" value="${savedRow[day] || ''}">
-              </td>
-            `).join('')}
-          </tr>
-        `;
-      }).join('');
+      const groupedItems = groupItemsByItemGroup(items);
+      tbody.innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-100/70">
+          <td colspan="8" class="p-3 border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedItems[groupName].map(i => {
+          const savedRow = savedStore[i.code] || [0, 0, 0, 0, 0, 0, 0];
+          return `
+            <tr>
+              <td class="p-4 border border-slate-100 font-bold text-slate-700 bg-slate-50/30">${escHtml(i.name)}</td>
+              ${[0, 1, 2, 3, 4, 5, 6].map(day => `
+                <td class="border border-slate-100 text-center p-3">
+                  <input type="number" class="forecast-input" data-item="${i.code}" data-day="${day}" placeholder="0" value="${savedRow[day] || ''}">
+                </td>
+              `).join('')}
+            </tr>
+          `;
+        }).join('')}
+      `).join('');
     }
 
     function saveForecast() {
@@ -2671,6 +3734,26 @@
       select.innerHTML = options;
     }
 
+    function getPOType(po) {
+      if (po && po.poType) return po.poType;
+      return po && po.items && po.items.some(i => i.source === 'forecast' || i.source === 'Forecast') ? 'Forecast' : 'Spesial';
+    }
+
+    function onPOHeaderChange() {
+      const typeSelect = document.getElementById('po-type-select');
+      if (typeSelect && typeSelect.value === 'Forecast') loadForecastToPO();
+    }
+
+    function onPOTypeChange() {
+      const type = document.getElementById('po-type-select').value;
+      const manualBtn = document.getElementById('btn-manual-entry');
+      const loadBtn = document.getElementById('btn-load-forecast');
+      if (manualBtn) manualBtn.classList.toggle('hidden', type === 'Forecast');
+      if (loadBtn) loadBtn.classList.toggle('hidden', type !== 'Forecast');
+      document.getElementById('po-table-body').innerHTML = '';
+      if (type === 'Forecast' && document.getElementById('po-date').value && document.getElementById('po-store-select').value) loadForecastToPO();
+    }
+
     function loadForecastToPO() {
       const tbody = document.getElementById('po-table-body');
       const dateInput = document.getElementById('po-date').value;
@@ -2686,18 +3769,19 @@
         const item = items.find(i => i.code === itemCode);
         if (!item) continue;
         const qty = myData[itemCode] ? (myData[itemCode][dayIndex] || 0) : 0;
-        if (qty > 0) html += buildPORow(itemCode, item.name, qty, 'forecast');
+        if (qty > 0) html += buildPORow(itemCode, item.name, qty, 'Forecast');
       }
       tbody.innerHTML = html ||
         '<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No forecast found for this date &amp; store.</td></tr>';
     }
 
     function buildPORow(itemCode, itemName, qty, source) {
-      const badge = source === 'forecast'
+      const normalizedSource = source === 'forecast' ? 'Forecast' : source;
+      const badge = normalizedSource === 'Forecast'
         ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md border border-blue-100">Forecast Data</span>`
-        : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2.5 py-1 rounded-md border border-amber-100">Manual Entry</span>`;
+        : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2.5 py-1 rounded-md border border-amber-100">${escHtml(normalizedSource)}</span>`;
       return `
-        <tr class="po-row hover:bg-slate-50/50 transition" data-source="${source}" data-item="${escHtml(itemCode)}">
+        <tr class="po-row hover:bg-slate-50/50 transition" data-source="${escHtml(normalizedSource)}" data-item="${escHtml(itemCode)}">
           <td class="p-5 font-bold text-slate-800">${escHtml(itemName)}</td>
           <td class="p-5">${badge}</td>
           <td class="p-5 text-right"><input type="number" value="${qty}" min="0" class="w-20 text-right border border-slate-200 p-2 rounded-lg font-bold po-qty"></td>
@@ -2711,6 +3795,7 @@
       const rows = document.querySelectorAll('.po-row');
       const date = document.getElementById('po-date').value;
       const store = document.getElementById('po-store-select').value;
+      const poType = document.getElementById('po-type-select').value || 'Forecast';
       if (!date) { showToast('Please select a date.', 'error'); return; }
       if (!store) { showToast('Please select a store.', 'error'); return; }
       if (!rows.length) { showToast('Order table is empty.', 'error'); return; }
@@ -2719,19 +3804,28 @@
       rows.forEach(row => {
         const qty = parseInt(row.querySelector('.po-qty').value) || 0;
         if (qty > 0) {
+          const itemGroup = getItemGroupName(row.dataset.item);
+          if (itemGroup === 'undecided') return;
           lineItems.push({
             itemCode: row.dataset.item,
+            itemGroup,
             qty,
             source: row.dataset.source
           });
         }
       });
+      const missingGroupRows = Array.from(rows).filter(row => (parseInt(row.querySelector('.po-qty').value) || 0) > 0 && getItemGroupName(row.dataset.item) === 'undecided');
+      if (missingGroupRows.length) {
+        showToast('Some PO items still have undecided Item Group. Please update Item Master first.', 'error');
+        return;
+      }
       if (!lineItems.length) { showToast('All quantities are zero.', 'error'); return; }
 
       const poDoc = {
         id: 'PO-' + Date.now(),
         date,
         store,
+        poType,
         items: lineItems,
         totalItems: lineItems.length,
         status: 'Submitted',
@@ -2771,19 +3865,18 @@
       // Newest first
       const sorted = [...purchaseOrders].reverse();
       container.innerHTML = sorted.map(po => {
-        const manualCount = po.items.filter(i => i.source === 'manual').length;
-        const forecastCount = po.items.filter(i => i.source === 'forecast').length;
+        const poType = getPOType(po);
         return `
           <tr class="hover:bg-blue-50/30 transition cursor-pointer group" onclick="showPODetail('${escHtml(po.id)}')">
             <td class="p-5">
               <span class="font-mono text-xs font-black text-blue-600 group-hover:underline">${escHtml(po.id)}</span>
+              <span class="block mt-1 text-[10px] font-black uppercase ${poType === 'Forecast' ? 'text-blue-600' : poType === 'Pengganti' ? 'text-amber-600' : 'text-indigo-600'}">${escHtml(poType)}</span>
             </td>
             <td class="p-5 text-slate-600 font-semibold">${escHtml(po.date)}</td>
             <td class="p-5 text-slate-700">${escHtml(po.store)}</td>
             <td class="p-5 text-center">
               <div class="flex gap-1.5 justify-center flex-wrap">
-                ${forecastCount ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">${forecastCount} Forecast</span>` : ''}
-                ${manualCount ? `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">${manualCount} Manual</span>` : ''}
+                <span class="text-[10px] font-black uppercase bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">${po.items.length} Lines</span>
               </div>
             </td>
             <td class="p-5 text-center">
@@ -2820,9 +3913,10 @@
         const conv = item ? item.conv : 1;
         const totalPcs = (lineItem.qty || 0) * conv;
         totalQty += lineItem.qty || 0;
-        const badge = lineItem.source === 'forecast'
+        const sourceLabel = lineItem.source === 'forecast' ? 'Forecast' : (lineItem.source || getPOType(po));
+        const badge = sourceLabel === 'Forecast'
           ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">Forecast</span>`
-          : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">Manual</span>`;
+          : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">${escHtml(sourceLabel)}</span>`;
         return `
           <tr class="hover:bg-slate-50/50">
             <td class="px-5 py-3.5 font-mono text-xs font-bold text-blue-600">${escHtml(lineItem.itemCode)}</td>
@@ -2866,15 +3960,21 @@
         tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic text-sm">No items match your search.</td></tr>`;
         return;
       }
-      tbody.innerHTML = list.map(i => `
-        <tr class="item-pick-row" onclick="selectItemForPO('${i.code}')">
-          <td class="px-5 py-3.5 font-mono text-xs font-bold text-blue-600">${escHtml(i.code)}</td>
-          <td class="px-5 py-3.5 font-semibold text-slate-800">${escHtml(i.name)}</td>
-          <td class="px-5 py-3.5 text-right text-xs text-slate-500">1 Pack = ${i.conv} Pcs</td>
-          <td class="px-5 py-3.5 text-right">
-            <button class="text-[10px] font-black uppercase bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">Select</button>
-          </td>
+      const groupedItems = groupItemsByItemGroup(list);
+      tbody.innerHTML = Object.keys(groupedItems).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="4" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
         </tr>
+        ${groupedItems[groupName].map(i => `
+          <tr class="item-pick-row" onclick="selectItemForPO('${i.code}')">
+            <td class="px-5 py-3.5 font-mono text-xs font-bold text-blue-600">${escHtml(i.code)}</td>
+            <td class="px-5 py-3.5 font-semibold text-slate-800">${escHtml(i.name)}</td>
+            <td class="px-5 py-3.5 text-right text-xs text-slate-500">1 Pack = ${i.conv} Pcs</td>
+            <td class="px-5 py-3.5 text-right">
+              <button class="text-[10px] font-black uppercase bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">Select</button>
+            </td>
+          </tr>
+        `).join('')}
       `).join('');
     }
 
@@ -2884,7 +3984,8 @@
       const tbody = document.getElementById('po-table-body');
       const placeholder = tbody.querySelector('td[colspan]');
       if (placeholder) placeholder.closest('tr').remove();
-      tbody.insertAdjacentHTML('beforeend', buildPORow(item.code, item.name, 1, 'manual'));
+      const poType = document.getElementById('po-type-select').value || 'Spesial';
+      tbody.insertAdjacentHTML('beforeend', buildPORow(item.code, item.name, 1, poType));
       closeItemPicker();
       showToast(`"${item.name}" added to draft order.`);
     }
@@ -2901,6 +4002,9 @@
     });
     document.getElementById('so2-detail-overlay').addEventListener('click', function (e) {
       if (e.target === this) closeSO2Detail();
+    });
+    document.getElementById('price-list-detail-overlay').addEventListener('click', function (e) {
+      if (e.target === this) closePriceListDetail();
     });
     document.getElementById('grpo-form-overlay').addEventListener('click', function (e) {
       if (e.target === this) closeReceiptForm();
@@ -2921,7 +4025,7 @@
       if (e.target === this) closeActualProdView();
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeItemPicker(); closePODetail(); closeSODetail(); closeSO2Detail(); closeReceiptForm(); closeGRPODetail(); closeBillingForm(); closeDODetail(); closeBillingDetail(); closeBillingView(); closeActualProdView(); }
+      if (e.key === 'Escape') { closeItemPicker(); closePODetail(); closeSODetail(); closeSO2Detail(); closePriceListDetail(); closeReceiptForm(); closeGRPODetail(); closeBillingForm(); closeDODetail(); closeBillingDetail(); closeBillingView(); closeActualProdView(); }
     });
 
     // =============================================================
@@ -3040,6 +4144,79 @@
       }
     }
 
+    // Replaces the legacy forecast-based recap with a PO Type based summary.
+    function generateRecap() {
+      const dateStr = document.getElementById('recap-date').value;
+      if (!dateStr) return;
+
+      const dateParts = dateStr.split('-');
+      const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      document.getElementById('recap-display-date').innerText =
+        date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      purchaseOrders = loadFromLocal(LS_KEYS.purchaseOrders, []);
+      const dailyPODocs = purchaseOrders.filter(po => po.date === dateStr);
+      const summary = {};
+      items.forEach(item => {
+        summary[item.code] = { Forecast: 0, Pengganti: 0, Spesial: 0 };
+      });
+
+      dailyPODocs.forEach(doc => {
+        const poType = getPOType(doc);
+        doc.items.forEach(line => {
+          if (!summary[line.itemCode]) summary[line.itemCode] = { Forecast: 0, Pengganti: 0, Spesial: 0 };
+          summary[line.itemCode][poType] = (summary[line.itemCode][poType] || 0) + (Number(line.qty) || 0);
+        });
+      });
+
+      let html = '';
+      let activeItemsCount = 0;
+      items.forEach(item => {
+        const data = summary[item.code];
+        const totalPacks = (data.Forecast || 0) + (data.Pengganti || 0) + (data.Spesial || 0);
+        if (totalPacks <= 0) return;
+        activeItemsCount++;
+        html += `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-5">
+              <div class="font-black text-slate-800">${escHtml(item.name)}</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${escHtml(item.code)} | ratio 1:${item.conv}</div>
+            </td>
+            <td class="p-5 text-center"><span class="font-bold text-blue-600">${data.Forecast || 0}</span><span class="text-[10px] text-slate-400 block">Packs</span></td>
+            <td class="p-5 text-center"><span class="font-bold text-amber-600">${data.Pengganti || 0}</span><span class="text-[10px] text-slate-400 block">Packs</span></td>
+            <td class="p-5 text-center"><span class="font-bold text-indigo-600">${data.Spesial || 0}</span><span class="text-[10px] text-slate-400 block">Packs</span></td>
+            <td class="p-5 text-right font-black text-blue-600 text-lg">${(totalPacks * item.conv).toLocaleString()} <span class="text-xs font-medium uppercase">Pcs</span></td>
+          </tr>`;
+      });
+
+      document.getElementById('recap-table-body').innerHTML = html ||
+        '<tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold uppercase tracking-widest">No PO data for this date</td></tr>';
+      document.getElementById('stat-total-items').innerText = activeItemsCount;
+      document.getElementById('stat-total-forecast-po').innerText = dailyPODocs.filter(po => getPOType(po) === 'Forecast').length;
+      document.getElementById('stat-total-po').innerText = dailyPODocs.length;
+
+      const recapPoList = document.getElementById('recap-po-list');
+      const recapPoBadge = document.getElementById('recap-po-badge');
+      if (recapPoBadge) recapPoBadge.textContent = dailyPODocs.length + ' Document' + (dailyPODocs.length !== 1 ? 's' : '');
+      if (!recapPoList) return;
+      if (!dailyPODocs.length) {
+        recapPoList.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-slate-300 text-sm italic">No submitted PO documents for this date.</td></tr>';
+        return;
+      }
+      recapPoList.innerHTML = dailyPODocs.map(po => `
+        <tr class="hover:bg-amber-50/30 transition cursor-pointer" onclick="showPODetail('${escHtml(po.id)}')">
+          <td class="p-5">
+            <div class="font-mono text-xs font-black text-blue-600 hover:underline">${escHtml(po.id)}</div>
+            <div class="text-[10px] font-black uppercase text-slate-400 mt-1">${escHtml(getPOType(po))}</div>
+          </td>
+          <td class="p-5 text-slate-600 font-semibold">${escHtml(po.store)}</td>
+          <td class="p-5 text-center"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">${po.items.length} lines</span></td>
+          <td class="p-5 text-right">
+            <button onclick="event.stopPropagation(); showPODetail('${escHtml(po.id)}')" class="text-xs text-blue-600 font-bold hover:bg-blue-50 px-3 py-1.5 rounded-lg transition"><i class="fas fa-eye mr-1"></i>Detail</button>
+          </td>
+        </tr>`).join('');
+    }
+
     // =============================================================
     //  SALES ORDER
     // =============================================================
@@ -3129,7 +4306,7 @@
       storeSelect.disabled = false;
     }
 
-    function buildSORow(itemCode, itemName, qty, source) {
+    function buildSORow(itemCode, itemName, qty, source, itemGroup = null) {
       const store = document.getElementById('so-store-select').value;
       const date = document.getElementById('so-date').value;
       const price = getPriceForItem(itemCode, store, date);
@@ -3139,7 +4316,7 @@
         ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">Forecast</span>`
         : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">Purchase Order</span>`;
       return `
-        <tr class="so-row hover:bg-slate-50/50 transition" data-source="${source}" data-item="${escHtml(itemCode)}">
+        <tr class="so-row hover:bg-slate-50/50 transition" data-source="${source}" data-item="${escHtml(itemCode)}" data-item-group="${escHtml(itemGroup || getItemGroupName(itemCode))}">
           <td class="p-5 font-bold text-slate-800">
             ${escHtml(itemName)}
             <div class="text-[10px] text-slate-400 font-mono">${escHtml(itemCode)}</div>
@@ -3272,7 +4449,7 @@
         const source = row.dataset.source;
         const price = parseFloat(row.querySelector('.so-price-display').textContent.replace(/,/g, '')) || 0;
         if (qty > 0) {
-          if (!itemMap[itemCode]) itemMap[itemCode] = { itemCode, qty: 0, source, price };
+          if (!itemMap[itemCode]) itemMap[itemCode] = { itemCode, itemGroup: getItemGroupName(itemCode), qty: 0, source, price };
           itemMap[itemCode].qty += qty;
         }
       });
@@ -3334,9 +4511,10 @@
         totalQty += lineItem.qty || 0;
         totalItemValue += subtotal;
 
-        const badge = lineItem.source === 'forecast'
-          ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">Forecast</span>`
-          : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">PO</span>`;
+        const sourceLabel = lineItem.source === 'forecast' ? 'Forecast' : (lineItem.source || 'PO');
+        const badge = sourceLabel.includes('Forecast')
+          ? `<span class="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">${escHtml(sourceLabel)}</span>`
+          : `<span class="text-[10px] font-black uppercase bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100">${escHtml(sourceLabel)}</span>`;
         return `
           <tr class="hover:bg-slate-50/50">
             <td class="px-5 py-3.5 font-mono text-xs font-bold text-blue-600">${escHtml(lineItem.itemCode)}</td>
@@ -3360,6 +4538,260 @@
 
     function closeSODetail() {
       document.getElementById('so-detail-overlay').classList.remove('active');
+    }
+
+    // Sales Order flow from Purchase Orders grouped by PO Type.
+    let activeSOPODocs = [];
+    let selectedSOPODocs = [];
+
+    function openAddSO() {
+      switchPage('page-producer-so-add');
+      const custSelect = document.getElementById('so-customer-select');
+      custSelect.innerHTML = '<option value="">Select Customer</option>' +
+        customers.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+
+      const dateInput = document.getElementById('so-date');
+      dateInput.value = getLocalDateString();
+      dateInput.onchange = () => {
+        document.querySelectorAll('.so-row').forEach(row => updateSORowPrice(row));
+      };
+
+      const storeSelect = document.getElementById('so-store-select');
+      storeSelect.innerHTML = '<option value="">Select Store</option>';
+      storeSelect.disabled = true;
+      storeSelect.onchange = () => {
+        document.querySelectorAll('.so-row').forEach(row => updateSORowPrice(row));
+      };
+
+      activeSOPODocs = [];
+      selectedSOPODocs = [];
+      renderSOPOSelectionPanel();
+      document.getElementById('so-table-body').innerHTML =
+        '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">Select Customer and Store, then click Get Purchase Order.</td></tr>';
+    }
+
+    function buildSORow(itemCode, itemName, qty, source, itemGroup = null) {
+      const store = document.getElementById('so-store-select').value;
+      const date = document.getElementById('so-date').value;
+      const price = getPriceForItem(itemCode, store, date);
+      const total = price * qty;
+      const sourceType = source.split('|')[0].trim();
+      const badgeClass = sourceType === 'Forecast' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+        sourceType === 'Pengganti' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100';
+
+      return `
+        <tr class="so-row hover:bg-slate-50/50 transition" data-source="${escHtml(source)}" data-item="${escHtml(itemCode)}" data-item-group="${escHtml(itemGroup || getItemGroupName(itemCode))}">
+          <td class="p-5 font-bold text-slate-800">
+            ${escHtml(itemName)}
+            <div class="text-[10px] text-slate-400 font-mono">${escHtml(itemCode)}</div>
+          </td>
+          <td class="p-5"><span class="text-[10px] font-black uppercase ${badgeClass} px-2 py-1 rounded border">${escHtml(source)}</span></td>
+          <td class="p-5 text-right font-mono text-sm text-slate-500 so-price-display">${price.toLocaleString()}</td>
+          <td class="p-5 text-right">
+            <input type="number" value="${qty}" min="0" class="w-20 text-right border border-slate-200 p-2 rounded-lg font-bold so-qty" oninput="calculateSORow(this)">
+          </td>
+          <td class="p-5 text-right font-black text-blue-600 so-total-display">${total.toLocaleString()}</td>
+          <td class="p-5 text-right">
+            <button onclick="this.closest('tr').remove()" class="text-slate-300 hover:text-red-500 transition text-sm"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`;
+    }
+
+    function getSOForecast() {
+      showToast('Sales Order now uses Purchase Orders by PO Type.', 'info');
+      getSOPurchaseOrder();
+    }
+
+    function getSOPurchaseOrder() {
+      const store = document.getElementById('so-store-select').value;
+      const dateStr = document.getElementById('so-date').value;
+      if (!store) { showToast('Please select a store first.', 'error'); return; }
+      if (!dateStr) { showToast('Please select a date.', 'error'); return; }
+
+      purchaseOrders = loadFromLocal(LS_KEYS.purchaseOrders, []);
+      activeSOPODocs = purchaseOrders.filter(po =>
+        po.store === store &&
+        po.date === dateStr &&
+        po.status !== 'Sales Ordered'
+      );
+      selectedSOPODocs = [...activeSOPODocs];
+
+      const tbody = document.getElementById('so-table-body');
+      if (!activeSOPODocs.length) {
+        renderSOPOSelectionPanel();
+        tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No available Purchase Orders for this store and date.</td></tr>';
+        return;
+      }
+
+      renderSOPOSelectionPanel();
+      renderSOItemsFromSelectedPOs();
+      showToast(`${activeSOPODocs.length} Purchase Order document${activeSOPODocs.length !== 1 ? 's' : ''} loaded.`);
+    }
+
+    function groupSOPODocsByType(poDocs) {
+      return poDocs.reduce((groups, po) => {
+        const type = getPOType(po);
+        if (!groups[type]) groups[type] = [];
+        groups[type].push(po);
+        return groups;
+      }, {});
+    }
+
+    function renderSOPOSelectionPanel() {
+      const panel = document.getElementById('so-po-selection-panel');
+      const list = document.getElementById('so-po-selection-list');
+      const count = document.getElementById('so-po-selection-count');
+      if (!panel || !list || !count) return;
+
+      if (!selectedSOPODocs.length) {
+        panel.classList.add('hidden');
+        list.innerHTML = '';
+        count.textContent = '0 PO';
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      count.textContent = selectedSOPODocs.length + ' PO';
+      const grouped = groupSOPODocsByType(selectedSOPODocs);
+      list.innerHTML = Object.keys(grouped).sort().map(type => `
+        <div class="border border-slate-100 rounded-xl overflow-hidden">
+          <div class="px-4 py-3 bg-slate-50 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black uppercase ${type === 'Forecast' ? 'text-blue-600' : type === 'Pengganti' ? 'text-amber-600' : 'text-indigo-600'}">${escHtml(type)}</span>
+              <span class="text-[10px] font-bold text-slate-400">${grouped[type].length} Document${grouped[type].length !== 1 ? 's' : ''}</span>
+            </div>
+            <button onclick="removeSOPOType('${escHtml(type)}')" class="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition">
+              <i class="fas fa-times mr-1"></i>Remove Type
+            </button>
+          </div>
+          <div class="divide-y divide-slate-50">
+            ${grouped[type].map(po => {
+              const totalQty = po.items.reduce((sum, row) => sum + (Number(row.qty) || 0), 0);
+              return `
+                <div class="px-4 py-3 flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-mono text-xs font-black text-blue-600">${escHtml(po.id)}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">${po.items.length} lines | ${totalQty} packs</div>
+                  </div>
+                  <button onclick="removeSOPODoc('${escHtml(po.id)}')" class="w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition" title="Remove PO">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removeSOPOType(type) {
+      selectedSOPODocs = selectedSOPODocs.filter(po => getPOType(po) !== type);
+      renderSOPOSelectionPanel();
+      renderSOItemsFromSelectedPOs();
+      showToast(`${type} Purchase Orders removed from selection.`, 'info');
+    }
+
+    function removeSOPODoc(poId) {
+      selectedSOPODocs = selectedSOPODocs.filter(po => po.id !== poId);
+      renderSOPOSelectionPanel();
+      renderSOItemsFromSelectedPOs();
+      showToast(`${poId} removed from selection.`, 'info');
+    }
+
+    function renderSOItemsFromSelectedPOs() {
+      const tbody = document.getElementById('so-table-body');
+      if (!selectedSOPODocs.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400 italic">No Purchase Orders selected.</td></tr>';
+        return;
+      }
+
+      const grouped = new Map();
+      selectedSOPODocs.forEach(po => {
+        const poType = getPOType(po);
+        po.items.forEach(line => {
+          if ((Number(line.qty) || 0) <= 0) return;
+          const key = `${poType}::${po.id}::${line.itemCode}`;
+          const existing = grouped.get(key) || { itemCode: line.itemCode, itemGroup: line.itemGroup || getItemGroupName(line.itemCode), qty: 0, source: poType, poId: po.id };
+          existing.qty += Number(line.qty) || 0;
+          grouped.set(key, existing);
+        });
+      });
+
+      const groupedRows = groupRowsByItemGroup(Array.from(grouped.values()));
+      tbody.innerHTML = Object.keys(groupedRows).sort().map(groupName => `
+        <tr class="bg-slate-50 border-t border-slate-100">
+          <td colspan="6" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedRows[groupName].map(row => {
+          const item = items.find(i => i.code === row.itemCode);
+          return buildSORow(row.itemCode, item ? item.name : row.itemCode, row.qty, `${row.source} | ${row.poId}`, row.itemGroup);
+        }).join('')}
+      `).join('');
+    }
+
+    function saveSalesOrder() {
+      const custId = document.getElementById('so-customer-select').value;
+      const store = document.getElementById('so-store-select').value;
+      const date = document.getElementById('so-date').value;
+      if (!custId) { showToast('Please select a customer.', 'error'); return; }
+      if (!store) { showToast('Please select a store.', 'error'); return; }
+      if (!date) { showToast('Please select a date.', 'error'); return; }
+      if (!selectedSOPODocs.length) { showToast('Select at least one Purchase Order.', 'error'); return; }
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+
+      const rows = document.querySelectorAll('.so-row');
+      const itemMap = {};
+      rows.forEach(row => {
+        const itemCode = row.dataset.item;
+        const qty = parseInt(row.querySelector('.so-qty').value) || 0;
+        const price = parseFloat(row.querySelector('.so-price-display').textContent.replace(/,/g, '')) || 0;
+        const source = row.dataset.source;
+        if (qty <= 0) return;
+        if (!itemMap[itemCode]) itemMap[itemCode] = { itemCode, itemGroup: row.dataset.itemGroup || getItemGroupName(itemCode), qty: 0, sourceTypes: new Set(), price };
+        itemMap[itemCode].qty += qty;
+        itemMap[itemCode].sourceTypes.add(source);
+        itemMap[itemCode].price = price;
+      });
+
+      const lineItems = Object.values(itemMap).map(row => ({
+        itemCode: row.itemCode,
+        itemGroup: row.itemGroup,
+        qty: row.qty,
+        price: row.price,
+        source: Array.from(row.sourceTypes).join(', ')
+      }));
+      if (!lineItems.length) { showToast('All quantities are zero.', 'error'); return; }
+
+      const cust = customers.find(c => String(c.id) === custId);
+      const storeObj = cust ? cust.stores.find(s => s.name === store) : null;
+      const ppnRate = storeObj ? storeObj.ppn : 11;
+      const subtotal = lineItems.reduce((sum, row) => sum + row.qty * row.price, 0);
+      const tax = subtotal * (ppnRate / 100);
+      const dateRaw = date.replace(/-/g, '');
+      const counter = String(salesOrders.filter(so => so.id.includes(`SO-${dateRaw}`)).length + 1).padStart(3, '0');
+      const soDoc = {
+        id: `SO-${dateRaw}-${counter}`,
+        date,
+        customerId: parseInt(custId),
+        customerName: cust ? cust.name : 'Unknown',
+        store,
+        sourcePOIds: selectedSOPODocs.map(po => po.id),
+        subtotal,
+        tax,
+        grandTotal: subtotal + tax,
+        items: lineItems,
+        status: 'Open',
+        createdAt: new Date().toISOString()
+      };
+
+      salesOrders.push(soDoc);
+      const sourceIds = new Set(soDoc.sourcePOIds);
+      purchaseOrders.forEach(po => {
+        if (sourceIds.has(po.id)) po.status = 'Sales Ordered';
+      });
+      saveToLocal(LS_KEYS.salesOrders, salesOrders);
+      saveToLocal(LS_KEYS.purchaseOrders, purchaseOrders);
+      showToast(`Sales Order "${soDoc.id}" created from ${soDoc.sourcePOIds.length} PO document${soDoc.sourcePOIds.length !== 1 ? 's' : ''}.`);
+      switchPage('page-producer-so');
     }
 
     // =============================================================
@@ -3475,7 +4907,7 @@
         for (const itemCode in forecastData[storeName]) {
           const qty = forecastData[storeName][itemCode][dayIndex];
           if (qty > 0) {
-            if (!itemMap[itemCode]) itemMap[itemCode] = { details: [] };
+            if (!itemMap[itemCode]) itemMap[itemCode] = { itemGroup: getItemGroupName(itemCode), details: [] };
             itemMap[itemCode].details.push({ customerName: custName, store: storeName, qty, source: 'Forecast' });
           }
         }
@@ -3488,7 +4920,7 @@
         po.items.forEach(line => {
           if (line.qty > 0) {
             const itemCode = line.itemCode;
-            if (!itemMap[itemCode]) itemMap[itemCode] = { details: [] };
+            if (!itemMap[itemCode]) itemMap[itemCode] = { itemGroup: line.itemGroup || getItemGroupName(itemCode), details: [] };
             let existing = itemMap[itemCode].details.find(d => d.store === po.store && d.source === 'PO');
             if (existing) {
               existing.qty += line.qty;
@@ -3506,6 +4938,7 @@
         so2DraftData.push({
           itemCode,
           itemName: item.name,
+          itemGroup: itemMap[itemCode].itemGroup || 'undecided',
           details: itemMap[itemCode].details
         });
       }
@@ -3522,7 +4955,19 @@
       }
 
       let html = '';
-      so2DraftData.forEach((row, index) => {
+      const groupedDraft = so2DraftData.reduce((groups, row, index) => {
+        const groupName = row.itemGroup || 'undecided';
+        if (!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push({ row, index });
+        return groups;
+      }, {});
+
+      Object.keys(groupedDraft).sort().forEach(groupName => {
+        html += `
+          <tr class="bg-slate-50 border-t border-slate-100">
+            <td colspan="3" class="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+          </tr>`;
+        groupedDraft[groupName].forEach(({ row, index }) => {
         let baseQty = 0;
         let detailHtml = '';
 
@@ -3558,6 +5003,7 @@
           </tr>
           ${detailHtml}
         `;
+        });
       });
       tbody.innerHTML = html;
     }
@@ -3629,7 +5075,7 @@
           baseQty += det.qty;
           if (det.qty > 0) {
             if (!storesMap[det.store]) storesMap[det.store] = { customerName: det.customerName, items: [] };
-            storesMap[det.store].items.push({ itemCode: row.itemCode, qty: det.qty });
+            storesMap[det.store].items.push({ itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: det.qty });
           }
         });
 
@@ -3638,7 +5084,7 @@
 
         const totalQty = baseQty + inhouseQty;
         if (totalQty > 0) {
-          prodItems.push({ itemCode: row.itemCode, qty: totalQty, inhouse: inhouseQty, details: row.details });
+          prodItems.push({ itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: totalQty, inhouse: inhouseQty, details: row.details });
         }
       });
 
@@ -3665,7 +5111,7 @@
           aggItems[it.itemCode] += it.qty;
         });
 
-        const soItems = Object.keys(aggItems).map(code => ({ itemCode: code, qty: aggItems[code] }));
+        const soItems = Object.keys(aggItems).map(code => ({ itemCode: code, itemGroup: getItemGroupName(code), qty: aggItems[code] }));
         const soCounter = String(so2Store.filter(s => s.id.includes(`SO2-${dateRaw}`)).length + 1).padStart(3, '0');
 
         so2Store.push({
@@ -3797,6 +5243,108 @@
       document.getElementById('so2-detail-overlay').classList.remove('active');
     }
 
+    // Production Control flow from Sales Order summary.
+    function renderSO2List() {
+      so2Production = loadFromLocal(LS_KEYS.so2Production, []);
+      const pBody = document.getElementById('so2-prod-list');
+      if (!so2Production.length) {
+        pBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No Production Orders yet.</td></tr>';
+        return;
+      }
+
+      pBody.innerHTML = [...so2Production].reverse().map(doc => {
+        const totalQty = doc.items ? doc.items.reduce((sum, item) => sum + (Number(item.qty) || 0), 0) : 0;
+        return `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-4 font-mono text-xs font-black text-blue-600">${escHtml(doc.id)}</td>
+            <td class="p-4 text-slate-600 font-semibold">${escHtml(doc.date)} <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full ml-2 text-slate-500">${totalQty} Total Packs</span></td>
+            <td class="p-4 text-center">
+              <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-md"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>${escHtml(doc.status)}</span>
+            </td>
+            <td class="p-4 text-right">
+              <button onclick="viewSO2Detail('${escHtml(doc.id)}', 'prod')" class="text-[10px] text-blue-600 font-bold hover:bg-blue-50 border border-blue-100 px-2.5 py-1.5 rounded-lg transition">
+                <i class="fas fa-eye mr-1"></i>View
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function openAddSO2() {
+      switchPage('page-producer-so2-add');
+      const localDate = getLocalDateString();
+      document.getElementById('so2-date').value = localDate;
+      generateSO2Data();
+    }
+
+    function generateSO2Data() {
+      const dateStr = document.getElementById('so2-date').value;
+      if (!dateStr) return;
+      salesOrders = loadFromLocal(LS_KEYS.salesOrders, []);
+      const dailySOs = salesOrders.filter(so => so.date === dateStr);
+      const itemMap = {};
+
+      dailySOs.forEach(so => {
+        so.items.forEach(line => {
+          const qty = Number(line.qty) || 0;
+          if (qty <= 0) return;
+          if (!itemMap[line.itemCode]) itemMap[line.itemCode] = { itemGroup: line.itemGroup || getItemGroupName(line.itemCode), details: [] };
+          itemMap[line.itemCode].details.push({
+            customerName: so.customerName || 'Unknown',
+            store: so.store,
+            qty,
+            source: so.id
+          });
+        });
+      });
+
+      so2DraftData = Object.keys(itemMap).map(itemCode => {
+        const item = items.find(i => i.code === itemCode);
+        return {
+          itemCode,
+          itemName: item ? item.name : itemCode,
+          itemGroup: itemMap[itemCode].itemGroup || 'undecided',
+          details: itemMap[itemCode].details
+        };
+      });
+
+      renderSO2Grid();
+      showToast(dailySOs.length ? `Generated from ${dailySOs.length} Sales Order document${dailySOs.length !== 1 ? 's' : ''}.` : 'No Sales Orders found for this date.', dailySOs.length ? 'success' : 'info');
+    }
+
+    function saveSO2() {
+      const dateStr = document.getElementById('so2-date').value;
+      if (!dateStr || !so2DraftData.length) { showToast('No valid data to save.', 'error'); return; }
+      const dateRaw = dateStr.replace(/-/g, '');
+      const prodItems = [];
+
+      so2DraftData.forEach((row, index) => {
+        const baseQty = row.details.reduce((sum, det) => sum + (Number(det.qty) || 0), 0);
+        const input = document.querySelector(`.so2-inhouse-input[data-index="${index}"]`);
+        const inhouseQty = parseInt(input ? input.value : 0) || 0;
+        const totalQty = baseQty + inhouseQty;
+        if (totalQty > 0) {
+          prodItems.push({ itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: totalQty, inhouse: inhouseQty, details: row.details });
+        }
+      });
+
+      if (!prodItems.length) { showToast('All quantities are zero.', 'error'); return; }
+      so2Production = loadFromLocal(LS_KEYS.so2Production, []);
+      const prodCounter = String(so2Production.filter(doc => doc.id.includes(`PROD-${dateRaw}`)).length + 1).padStart(3, '0');
+      const prodDoc = {
+        id: `PROD-${dateRaw}-${prodCounter}`,
+        date: dateStr,
+        items: prodItems,
+        status: 'Open',
+        createdAt: new Date().toISOString()
+      };
+      so2Production.push(prodDoc);
+      saveToLocal(LS_KEYS.so2Production, so2Production);
+
+      showToast(`Production Order ${prodDoc.id} created.`);
+      switchPage('page-producer-so2');
+    }
+
     // =============================================================
     //  CONSUMER - GOODS RECEIPT (GRPO)
     // =============================================================
@@ -3882,7 +5430,7 @@
         const item = items.find(i => i.code === it.itemCode);
         const name = item ? item.name : it.itemCode;
         return `
-          <tr class="grpo-row hover:bg-slate-50/50 border-t border-slate-100" data-item="${escHtml(it.itemCode)}">
+          <tr class="grpo-row hover:bg-slate-50/50 border-t border-slate-100" data-item="${escHtml(it.itemCode)}" data-item-group="${escHtml(it.itemGroup || 'undecided')}">
             <td class="px-5 py-3 font-semibold text-slate-800">${escHtml(name)} <span class="text-[10px] text-slate-400 ml-1">${escHtml(it.itemCode)}</span></td>
             <td class="px-5 py-3 text-center font-bold text-slate-500">${it.qty}</td>
             <td class="px-5 py-3 text-right">
@@ -3909,7 +5457,7 @@
       rows.forEach(row => {
         const itemCode = row.dataset.item;
         const qty = parseInt(row.querySelector('.grpo-qty-input').value) || 0;
-        receivedItems.push({ itemCode, qty });
+        receivedItems.push({ itemCode, itemGroup: row.dataset.itemGroup || 'undecided', qty });
       });
 
       // Update SO Status
@@ -3962,7 +5510,7 @@
     }
 
     function viewGRPODetail(grpoId) {
-      grpoData = loadFromLocal(LS_KEYS.grpo, []);
+      grpoData = loadFromLocal(LS_KEYS.grpoData, []);
       const doc = grpoData.find(d => d.id === grpoId);
       if (!doc) { showToast('GRPO not found.', 'error'); return; }
 
@@ -3987,6 +5535,289 @@
 
     function closeGRPODetail() {
       document.getElementById('grpo-detail-overlay').classList.remove('active');
+    }
+
+    // =============================================================
+    //  GOODS RETURN
+    // =============================================================
+    let goodsReturnDraft = [];
+
+    function getAllStoreNames() {
+      return [...new Set(customers.flatMap(c => c.stores.map(s => s.name)))].sort((a, b) => a.localeCompare(b));
+    }
+
+    function initGoodsReturnPage() {
+      goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+      const storeSelect = document.getElementById('return-store-select');
+      const selectedStore = storeSelect.value;
+      const storeNames = getAllStoreNames();
+      storeSelect.innerHTML = '<option value="">Select Store</option>' +
+        storeNames.map(store => `<option value="${escHtml(store)}">${escHtml(store)}</option>`).join('');
+      if (storeNames.includes(selectedStore)) storeSelect.value = selectedStore;
+
+      const groupedItems = groupItemsByItemGroup(items);
+      document.getElementById('return-item-select').innerHTML = '<option value="">Select Item</option>' +
+        Object.keys(groupedItems).sort().map(groupName => `
+          <optgroup label="${escHtml(groupName)}">
+            ${groupedItems[groupName].map(item => `<option value="${escHtml(item.code)}">${escHtml(item.code)} - ${escHtml(item.name)}</option>`).join('')}
+          </optgroup>
+        `).join('');
+      if (!document.getElementById('return-date').value) document.getElementById('return-date').value = getLocalDateString();
+      renderGoodsReturnDraft();
+      renderGoodsReturnHistory();
+    }
+
+    function addGoodsReturnItem() {
+      const itemCode = document.getElementById('return-item-select').value;
+      const qty = parseInt(document.getElementById('return-item-qty').value) || 0;
+      if (!itemCode) { showToast('Select an item first.', 'error'); return; }
+      if (qty <= 0) { showToast('Return quantity must be greater than zero.', 'error'); return; }
+      const itemGroup = getItemGroupName(itemCode);
+      if (itemGroup === 'undecided') {
+        showToast('This item still has undecided Item Group. Please update Item Master first.', 'error');
+        return;
+      }
+
+      const existing = goodsReturnDraft.find(item => item.itemCode === itemCode);
+      if (existing) existing.qty += qty;
+      else goodsReturnDraft.push({ itemCode, itemGroup, qty });
+
+      document.getElementById('return-item-select').value = '';
+      document.getElementById('return-item-qty').value = 1;
+      renderGoodsReturnDraft();
+    }
+
+    function removeGoodsReturnItem(itemCode) {
+      goodsReturnDraft = goodsReturnDraft.filter(item => item.itemCode !== itemCode);
+      renderGoodsReturnDraft();
+    }
+
+    function renderGoodsReturnDraft() {
+      const tbody = document.getElementById('return-draft-body');
+      if (!goodsReturnDraft.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-slate-400 italic">No return items added.</td></tr>';
+        return;
+      }
+
+      const groupedDraft = groupRowsByItemGroup(goodsReturnDraft);
+      tbody.innerHTML = Object.keys(groupedDraft).sort().map(groupName => `
+        <tr class="bg-slate-50">
+          <td colspan="3" class="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">${escHtml(groupName)}</td>
+        </tr>
+        ${groupedDraft[groupName].map(row => {
+          const item = items.find(i => i.code === row.itemCode);
+          return `
+            <tr>
+              <td class="p-5">
+                <div class="font-bold text-slate-800">${escHtml(item ? item.name : row.itemCode)}</div>
+                <div class="text-[10px] font-mono text-slate-400">${escHtml(row.itemCode)}</div>
+              </td>
+              <td class="p-5 text-right font-black text-slate-700">${row.qty}</td>
+              <td class="p-5 text-right">
+                <button onclick="removeGoodsReturnItem('${escHtml(row.itemCode)}')"
+                  class="w-8 h-8 text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove item">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>`;
+        }).join('')}
+      `).join('');
+    }
+
+    function submitGoodsReturn() {
+      const store = document.getElementById('return-store-select').value;
+      const date = document.getElementById('return-date').value;
+      if (!store) { showToast('Select a store.', 'error'); return; }
+      if (!date) { showToast('Return date is required.', 'error'); return; }
+      if (!goodsReturnDraft.length) { showToast('Add at least one return item.', 'error'); return; }
+
+      const customer = customers.find(c => c.stores.some(s => s.name === store));
+      const returnDoc = {
+        id: 'RET-' + Date.now(),
+        date,
+        store,
+        customerName: customer ? customer.name : '',
+        items: goodsReturnDraft.map(item => ({ ...item })),
+        status: 'Submitted',
+        createdAt: new Date().toISOString()
+      };
+
+      goodsReturns.push(returnDoc);
+      saveToLocal(LS_KEYS.goodsReturns, goodsReturns);
+      goodsReturnDraft = [];
+      renderGoodsReturnDraft();
+      renderGoodsReturnHistory();
+      showToast(`Goods Return ${returnDoc.id} submitted.`);
+    }
+
+    function renderGoodsReturnHistory() {
+      goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+      const tbody = document.getElementById('return-history-body');
+      if (!goodsReturns.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No Goods Return documents.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = [...goodsReturns].reverse().map(doc => `
+        <tr class="hover:bg-slate-50/50">
+          <td class="p-4 font-mono text-xs font-black text-blue-600">${escHtml(doc.id)}</td>
+          <td class="p-4 font-semibold text-slate-600">${escHtml(doc.date)}</td>
+          <td class="p-4 font-bold text-slate-800">${escHtml(doc.store)}</td>
+          <td class="p-4 text-center font-bold text-slate-600">${doc.items.length}</td>
+          <td class="p-4 text-center">
+            <span class="inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold ${doc.status === 'Credited' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}">${escHtml(doc.status)}</span>
+          </td>
+        </tr>`).join('');
+    }
+
+    // =============================================================
+    //  CREDIT NOTE
+    // =============================================================
+    let activeCreditNoteData = null;
+
+    function initCreditNotePage() {
+      goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+      creditNotes = loadFromLocal(LS_KEYS.creditNotes, []);
+      priceLists = loadFromLocal(LS_KEYS.priceLists, []);
+
+      const select = document.getElementById('cn-store-select');
+      const currentStore = select.value;
+      const returnStores = [...new Set(goodsReturns.map(doc => doc.store))].sort((a, b) => a.localeCompare(b));
+      select.innerHTML = '<option value="">Select Store</option>' +
+        returnStores.map(store => `<option value="${escHtml(store)}">${escHtml(store)}</option>`).join('');
+      if (returnStores.includes(currentStore)) select.value = currentStore;
+
+      if (!document.getElementById('cn-document-date').value) document.getElementById('cn-document-date').value = getLocalDateString();
+      activeCreditNoteData = null;
+      document.getElementById('cn-preview-body').innerHTML =
+        '<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Choose a store and return period.</td></tr>';
+      document.getElementById('cn-preview-meta').textContent = 'Choose a store and return period.';
+      document.getElementById('cn-preview-total').textContent = 'Rp 0';
+      renderCreditNoteHistory();
+    }
+
+    function generateCreditNotePreview() {
+      const store = document.getElementById('cn-store-select').value;
+      const fromDate = document.getElementById('cn-date-from').value;
+      const toDate = document.getElementById('cn-date-to').value;
+      const documentDate = document.getElementById('cn-document-date').value;
+      const tbody = document.getElementById('cn-preview-body');
+
+      if (!store || !fromDate || !toDate || !documentDate) {
+        activeCreditNoteData = null;
+        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Complete the Store, period, and Credit Note date.</td></tr>';
+        document.getElementById('cn-preview-meta').textContent = 'Complete all filters to load Goods Returns.';
+        document.getElementById('cn-preview-total').textContent = 'Rp 0';
+        return;
+      }
+      if (fromDate > toDate) {
+        showToast('Return From date cannot be after Return To date.', 'error');
+        return;
+      }
+
+      goodsReturns = loadFromLocal(LS_KEYS.goodsReturns, []);
+      priceLists = loadFromLocal(LS_KEYS.priceLists, []);
+      const matchedReturns = goodsReturns.filter(doc =>
+        doc.store === store &&
+        doc.date >= fromDate &&
+        doc.date <= toDate &&
+        doc.status !== 'Credited'
+      );
+
+      if (!matchedReturns.length) {
+        activeCreditNoteData = null;
+        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No unprocessed Goods Returns found.</td></tr>';
+        document.getElementById('cn-preview-meta').textContent = 'No eligible Goods Returns in this period.';
+        document.getElementById('cn-preview-total').textContent = 'Rp 0';
+        return;
+      }
+
+      const grouped = new Map();
+      matchedReturns.forEach(doc => {
+        doc.items.forEach(row => {
+          const existing = grouped.get(row.itemCode) || { itemCode: row.itemCode, itemGroup: row.itemGroup || 'undecided', qty: 0 };
+          existing.qty += Number(row.qty) || 0;
+          grouped.set(row.itemCode, existing);
+        });
+      });
+
+      const groupedItems = Array.from(grouped.values()).map(row => {
+        const itemCode = row.itemCode;
+        const qty = row.qty;
+        const price = getPriceForItem(itemCode, store, documentDate);
+        return { itemCode, itemGroup: row.itemGroup || 'undecided', qty, price, amount: qty * price };
+      });
+      const total = groupedItems.reduce((sum, row) => sum + row.amount, 0);
+      const missingPrices = groupedItems.filter(row => row.price <= 0).map(row => row.itemCode);
+
+      activeCreditNoteData = {
+        store,
+        fromDate,
+        toDate,
+        documentDate,
+        sourceReturnIds: matchedReturns.map(doc => doc.id),
+        items: groupedItems,
+        total,
+        missingPrices
+      };
+
+      tbody.innerHTML = renderGroupedAmountRows(groupedItems);
+
+      document.getElementById('cn-preview-meta').textContent =
+        `${matchedReturns.length} Goods Return document${matchedReturns.length !== 1 ? 's' : ''} | Price date: ${documentDate}`;
+      document.getElementById('cn-preview-total').textContent = 'Rp ' + total.toLocaleString();
+    }
+
+    function saveCreditNote() {
+      if (!activeCreditNoteData) { showToast('Load Goods Returns first.', 'error'); return; }
+      if (activeCreditNoteData.missingPrices.length) {
+        showToast(`Active price not found for: ${activeCreditNoteData.missingPrices.join(', ')}`, 'error');
+        return;
+      }
+
+      const customer = customers.find(c => c.stores.some(s => s.name === activeCreditNoteData.store));
+      const creditNote = {
+        id: 'CN-' + Date.now(),
+        date: activeCreditNoteData.documentDate,
+        store: activeCreditNoteData.store,
+        customerName: customer ? customer.name : '',
+        returnFrom: activeCreditNoteData.fromDate,
+        returnTo: activeCreditNoteData.toDate,
+        sourceReturnIds: [...activeCreditNoteData.sourceReturnIds],
+        items: activeCreditNoteData.items.map(row => ({ ...row })),
+        total: activeCreditNoteData.total,
+        createdAt: new Date().toISOString()
+      };
+
+      creditNotes.push(creditNote);
+      goodsReturns.forEach(doc => {
+        if (creditNote.sourceReturnIds.includes(doc.id)) {
+          doc.status = 'Credited';
+          doc.creditNoteId = creditNote.id;
+        }
+      });
+      saveToLocal(LS_KEYS.creditNotes, creditNotes);
+      saveToLocal(LS_KEYS.goodsReturns, goodsReturns);
+      showToast(`Credit Note ${creditNote.id} created.`);
+      initCreditNotePage();
+    }
+
+    function renderCreditNoteHistory() {
+      creditNotes = loadFromLocal(LS_KEYS.creditNotes, []);
+      const tbody = document.getElementById('cn-history-body');
+      if (!creditNotes.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No Credit Note documents.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = [...creditNotes].reverse().map(doc => `
+        <tr class="hover:bg-slate-50/50">
+          <td class="p-4 font-mono text-xs font-black text-blue-600">${escHtml(doc.id)}</td>
+          <td class="p-4 font-semibold text-slate-600">${escHtml(doc.date)}</td>
+          <td class="p-4 font-bold text-slate-800">${escHtml(doc.store)}</td>
+          <td class="p-4 text-center font-bold text-slate-600">${doc.sourceReturnIds.length}</td>
+          <td class="p-4 text-right font-black text-slate-900">Rp ${doc.total.toLocaleString()}</td>
+        </tr>`).join('');
     }
 
     // =============================================================
