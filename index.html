@@ -1401,13 +1401,25 @@
 
       <!-- ===== Producer: Daily Recap ===== -->
       <section id="page-producer-recap" class="hidden animate-in fade-in duration-500">
-        <div class="flex justify-between items-end mb-8">
+        <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-end mb-8">
           <div>
             <h2 class="text-3xl font-extrabold text-slate-900">Daily Aggregation</h2>
-            <p class="text-slate-500">Purchase Order summary by PO Type</p>
+            <p class="text-slate-500">Purchase Order summary by PO Type and date period</p>
           </div>
-          <input type="date" id="recap-date" onchange="generateRecap()"
-            class="border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="recap-date-from"
+                class="block text-[10px] font-black text-slate-400 uppercase mb-1">From</label>
+              <input type="date" id="recap-date-from" onchange="generateRecap()"
+                class="w-full border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label for="recap-date-to"
+                class="block text-[10px] font-black text-slate-400 uppercase mb-1">To</label>
+              <input type="date" id="recap-date-to" onchange="generateRecap()"
+                class="w-full border border-slate-200 p-3 rounded-xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -1432,7 +1444,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="p-5 bg-slate-900 text-white font-bold flex justify-between items-center">
             <span class="tracking-wide">DAILY PURCHASE ORDER SUMMARY</span>
-            <span id="recap-display-date" class="text-blue-400 text-sm">Select Date</span>
+            <span id="recap-display-date" class="text-blue-400 text-sm">Select Period</span>
           </div>
           <table class="w-full text-left">
             <thead>
@@ -1452,7 +1464,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
           <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
             <h3 class="font-bold text-slate-700 text-sm uppercase tracking-widest">
-              <i class="fas fa-link mr-2 text-blue-400"></i>Source PO Documents for this Date
+              <i class="fas fa-link mr-2 text-blue-400"></i>Source PO Documents for Selected Period
             </h3>
             <span id="recap-po-badge"
               class="text-xs font-black bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1.5 rounded-lg">0
@@ -2216,7 +2228,8 @@
       if (pageId === 'page-producer-recap') {
         const d = new Date();
         const localDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        document.getElementById('recap-date').value = localDate;
+        document.getElementById('recap-date-from').value = localDate;
+        document.getElementById('recap-date-to').value = localDate;
         generateRecap();
       }
     }
@@ -4031,7 +4044,7 @@
     // =============================================================
     //  DAILY RECAP / AGGREGATION  (Deep Integration)
     // =============================================================
-    function generateRecap() {
+    function generateLegacyRecap() {
       const dateStr = document.getElementById('recap-date').value;
       if (!dateStr) return;
 
@@ -4146,22 +4159,33 @@
 
     // Replaces the legacy forecast-based recap with a PO Type based summary.
     function generateRecap() {
-      const dateStr = document.getElementById('recap-date').value;
-      if (!dateStr) return;
+      const dateFrom = document.getElementById('recap-date-from').value;
+      const dateTo = document.getElementById('recap-date-to').value;
+      if (!dateFrom || !dateTo) return;
+      if (dateFrom > dateTo) {
+        showToast('From date cannot be after To date.', 'error');
+        return;
+      }
 
-      const dateParts = dateStr.split('-');
-      const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-      document.getElementById('recap-display-date').innerText =
-        date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+      const formatRecapDate = dateStr => {
+        const parts = dateStr.split('-');
+        return new Date(parts[0], parts[1] - 1, parts[2])
+          .toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      };
+      document.getElementById('recap-display-date').innerText = dateFrom === dateTo
+        ? formatRecapDate(dateFrom)
+        : `${formatRecapDate(dateFrom)} - ${formatRecapDate(dateTo)}`;
 
       purchaseOrders = loadFromLocal(LS_KEYS.purchaseOrders, []);
-      const dailyPODocs = purchaseOrders.filter(po => po.date === dateStr);
+      const periodPODocs = purchaseOrders.filter(po =>
+        po.date >= dateFrom && po.date <= dateTo
+      );
       const summary = {};
       items.forEach(item => {
         summary[item.code] = { Forecast: 0, Pengganti: 0, Spesial: 0 };
       });
 
-      dailyPODocs.forEach(doc => {
+      periodPODocs.forEach(doc => {
         const poType = getPOType(doc);
         doc.items.forEach(line => {
           if (!summary[line.itemCode]) summary[line.itemCode] = { Forecast: 0, Pengganti: 0, Spesial: 0 };
@@ -4190,24 +4214,24 @@
       });
 
       document.getElementById('recap-table-body').innerHTML = html ||
-        '<tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold uppercase tracking-widest">No PO data for this date</td></tr>';
+        '<tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold uppercase tracking-widest">No PO data for this period</td></tr>';
       document.getElementById('stat-total-items').innerText = activeItemsCount;
-      document.getElementById('stat-total-forecast-po').innerText = dailyPODocs.filter(po => getPOType(po) === 'Forecast').length;
-      document.getElementById('stat-total-po').innerText = dailyPODocs.length;
+      document.getElementById('stat-total-forecast-po').innerText = periodPODocs.filter(po => getPOType(po) === 'Forecast').length;
+      document.getElementById('stat-total-po').innerText = periodPODocs.length;
 
       const recapPoList = document.getElementById('recap-po-list');
       const recapPoBadge = document.getElementById('recap-po-badge');
-      if (recapPoBadge) recapPoBadge.textContent = dailyPODocs.length + ' Document' + (dailyPODocs.length !== 1 ? 's' : '');
+      if (recapPoBadge) recapPoBadge.textContent = periodPODocs.length + ' Document' + (periodPODocs.length !== 1 ? 's' : '');
       if (!recapPoList) return;
-      if (!dailyPODocs.length) {
-        recapPoList.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-slate-300 text-sm italic">No submitted PO documents for this date.</td></tr>';
+      if (!periodPODocs.length) {
+        recapPoList.innerHTML = '<tr><td colspan="4" class="py-10 text-center text-slate-300 text-sm italic">No submitted PO documents for this period.</td></tr>';
         return;
       }
-      recapPoList.innerHTML = dailyPODocs.map(po => `
+      recapPoList.innerHTML = periodPODocs.map(po => `
         <tr class="hover:bg-amber-50/30 transition cursor-pointer" onclick="showPODetail('${escHtml(po.id)}')">
           <td class="p-5">
             <div class="font-mono text-xs font-black text-blue-600 hover:underline">${escHtml(po.id)}</div>
-            <div class="text-[10px] font-black uppercase text-slate-400 mt-1">${escHtml(getPOType(po))}</div>
+            <div class="text-[10px] font-black uppercase text-slate-400 mt-1">${escHtml(getPOType(po))} | ${escHtml(po.date)}</div>
           </td>
           <td class="p-5 text-slate-600 font-semibold">${escHtml(po.store)}</td>
           <td class="p-5 text-center"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">${po.items.length} lines</span></td>
